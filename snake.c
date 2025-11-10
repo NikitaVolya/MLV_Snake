@@ -8,6 +8,7 @@ Snake create_snake() {
         
     rep.count = 1;
     rep.head_index = 0;
+    rep.is_alive = 1;
 
     rep.direction = SNAKE_DIRECTION_RIGTH;
 
