@@ -40,11 +40,23 @@ void game_input(GameConfig* config) {
                 case MLV_KEYBOARD_d:
                     first_player_dir = SNAKE_DIRECTION_RIGTH;
                     break;
+                case MLV_KEYBOARD_UP:
+                    second_player_dir = SNAKE_DIRECTION_TOP;
+                    break;
+                case MLV_KEYBOARD_DOWN:
+                    second_player_dir = SNAKE_DIRECTION_BOTTOM;
+                    break;
+                case MLV_KEYBOARD_LEFT:
+                    second_player_dir = SNAKE_DIRECTION_LEFT;
+                    break;
+                case MLV_KEYBOARD_RIGHT:
+                    second_player_dir = SNAKE_DIRECTION_RIGTH;
                 default:
                     break;
                 }
 
                 set_snake_direction(&config->first_player, first_player_dir);
+                set_snake_direction(&config->second_player, second_player_dir);
             }
             
         }
