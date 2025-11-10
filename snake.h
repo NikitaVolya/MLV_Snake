@@ -16,7 +16,7 @@ typedef enum {
 typedef struct {
     vector2i items[MAX_SNAKE_SIZE];
     size_t count, head_index;
-    SnakeDirection direction;
+    SnakeDirection direction, to_rotate;
     int is_alive;
 } Snake;
 

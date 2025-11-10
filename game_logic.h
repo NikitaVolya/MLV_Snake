@@ -4,7 +4,8 @@
 #include"game_config.h"
 #include"game_screen.h"
 
-#define UPDATE_MI_TIME 320
+#define DRAW_TIME 200
+#define MOVE_TIME 30000
 
 
 void game_input(GameConfig *config);

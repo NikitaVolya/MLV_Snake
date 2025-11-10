@@ -43,11 +43,13 @@ void game_input(GameConfig* config) {
                 default:
                     break;
                 }
+
+                set_snake_direction(&config->first_player, first_player_dir);
             }
+            
         }
     } while (event != MLV_NONE);
     
-    set_snake_direction(&config->first_player, first_player_dir);
 }
 
 
@@ -139,30 +141,37 @@ void update_game(GameConfig *config) {
 
     check_outofbounds(&config->first_player);
 
-    game_input(config);
-
 }
 
 void game_cycle(GameConfig *config) {
     struct timespec start_time, end_time;
-    long delta_time;
+    unsigned long delta_time, next_move;
 
+    next_move = 0;
+    
     while (1) {
 
         clock_gettime(CLOCK_REALTIME, &start_time);
+        
+        game_input(config);
 
-        update_game(config);
+        if (next_move >= MOVE_TIME) {
+            next_move = 0;
+            update_game(config);
+        }
 
-        draw_game(config);
+        draw_game(config, (float) next_move / MOVE_TIME);
 
         clock_gettime(CLOCK_REALTIME, &end_time);
 
-        delta_time = (end_time.tv_sec - start_time.tv_nsec) / 10000000;
+        delta_time = (end_time.tv_nsec - start_time.tv_nsec) / 1000;
+        
+        if (delta_time > DRAW_TIME)
+            delta_time = DRAW_TIME;
 
-        if (delta_time > UPDATE_MI_TIME)
-            delta_time = UPDATE_MI_TIME;
+        next_move += delta_time;
 
-        MLV_wait_milliseconds(UPDATE_MI_TIME - delta_time);
+        MLV_wait_milliseconds(DRAW_TIME - delta_time);
     }
     
 }

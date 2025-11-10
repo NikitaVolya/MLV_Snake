@@ -11,6 +11,7 @@ Snake create_snake() {
     rep.is_alive = 1;
 
     rep.direction = SNAKE_DIRECTION_RIGTH;
+    rep.to_rotate = SNAKE_DIRECTION_RIGTH;
 
     return rep;
 }
@@ -50,7 +51,7 @@ void move_snake(Snake *snake) {
     
     next_snake_p = snake->items[snake->head_index];
 
-    switch (snake->direction) {
+    switch (snake->to_rotate) {
     case SNAKE_DIRECTION_TOP:
         next_snake_p.y -= 1;
         break;
@@ -66,6 +67,8 @@ void move_snake(Snake *snake) {
     default:
         break;
     }
+    
+    snake->direction = snake->to_rotate;
     
     if (snake->head_index == 0)
         next_head_i = MAX_SNAKE_SIZE - 1;
@@ -83,5 +86,5 @@ void move_and_expand_snake(Snake *snake) {
 
 void set_snake_direction(Snake *snake, SnakeDirection direction) {
     if (snake->direction != -direction)
-        snake->direction = direction;
+        snake->to_rotate = direction;
 }
