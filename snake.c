@@ -82,5 +82,6 @@ void move_and_expand_snake(Snake *snake) {
 }
 
 void set_snake_direction(Snake *snake, SnakeDirection direction) {
-    snake->direction = direction;
+    if (snake->direction != -direction)
+        snake->direction = direction;
 }

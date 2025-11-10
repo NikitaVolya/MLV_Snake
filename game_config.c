@@ -8,8 +8,9 @@ void init_game(GameConfig *game_config, GAME_MODE game_mode) {
     if (game_mode == GAME_TWO_PLAYER_MODE)
         game_config->second_player = create_snake();
 
+    game_config->move_timer = 1500;
+    game_config->next_move = game_config->move_timer;
     game_config->game_mode = game_mode;
-    game_config->grid_size = create_vector2i(20, 20);
 
     place_apple(game_config);
 }
@@ -22,8 +23,8 @@ void place_apple(GameConfig *game_config) {
     do {
         is_good = 1;
 
-        random_p.x = rand() % game_config->grid_size.x;
-        random_p.y = rand() % game_config->grid_size.y;
+        random_p.x = rand() % GRID_SIZE;
+        random_p.y = rand() % GRID_SIZE;
 
         for(i = 0; i < get_snake_size(&game_config->first_player) && is_good; i++) {
             snake_part_p = get_snake_part_position(&game_config->first_player, i);

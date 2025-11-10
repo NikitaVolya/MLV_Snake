@@ -4,7 +4,7 @@
 
 #include"vector2i.h"
 
-#define MAX_SNAKE_SIZE 60
+#define MAX_SNAKE_SIZE 225
 
 typedef enum {
     SNAKE_DIRECTION_TOP = 1,
