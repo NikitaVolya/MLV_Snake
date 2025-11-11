@@ -176,14 +176,14 @@ void game_cycle(GameConfig *config) {
 
         clock_gettime(CLOCK_REALTIME, &end_time);
 
-        delta_time = (end_time.tv_nsec - start_time.tv_nsec) / 1000;
-        
-        if (delta_time > DRAW_TIME)
-            delta_time = DRAW_TIME;
+        delta_time = (end_time.tv_sec - start_time.tv_sec) * SEC_IN_NSEC + (end_time.tv_nsec - start_time.tv_nsec);;
 
-        next_move += delta_time;
-
-        MLV_wait_milliseconds(DRAW_TIME - delta_time);
+        if (delta_time <= DRAW_TIME) {
+            MLV_wait_milliseconds((DRAW_TIME - delta_time) / MSEC_IN_NSEC);
+            next_move += DRAW_TIME;
+        } else {
+            next_move += delta_time;
+        }
     }
     
 }
