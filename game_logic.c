@@ -10,9 +10,6 @@ void game_input(GameConfig* config) {
 
     SnakeDirection first_player_dir, second_player_dir;
 
-    
-    first_player_dir = get_snake_direction(&config->first_player);
-    second_player_dir = get_snake_direction(&config->second_player);
 
     do {
 
@@ -26,6 +23,9 @@ void game_input(GameConfig* config) {
         if (event == MLV_KEY) {
 
             if (state == MLV_PRESSED) {
+
+                first_player_dir = get_snake_next_rotation(&config->first_player);
+                second_player_dir = get_snake_next_rotation(&config->second_player);
 
                 switch (sym) {
                 case MLV_KEYBOARD_w: case MLV_KEYBOARD_z:
@@ -133,10 +133,18 @@ void update_game(GameConfig *config) {
         else
             move_snake(&config->first_player);
 
+        check_outofbounds(&config->first_player);
+
         check_self_snake_colision(&config->first_player);
 
         if (config->game_mode == GAME_TWO_PLAYER_MODE)
             check_snake_colision(&config->first_player, &config->second_player);
+
+        if (!config->first_player.is_alive) {
+            move_back_snake(&config->first_player);
+            remove_tail_snake(&config->first_player);
+        }
+
     }
 
     
@@ -146,12 +154,18 @@ void update_game(GameConfig *config) {
             move_and_expand_snake(&config->second_player);
         else
             move_snake(&config->second_player);
+        
+        check_outofbounds(&config->second_player);
 
         check_self_snake_colision(&config->second_player);
         check_snake_colision(&config->second_player, &config->first_player);
+
+        if (!config->second_player.is_alive) {
+            move_back_snake(&config->second_player);
+            remove_tail_snake(&config->second_player);
+        }
     }
 
-    check_outofbounds(&config->first_player);
 
 }
 
@@ -192,9 +206,7 @@ void game_cycle(GameConfig *config) {
 void start() {
     GameConfig config;
 
-    init_game(&config, GAME_SINGLE_MODE);
-
-    move_and_expand_snake(&config.first_player);
+    init_game(&config, GAME_TWO_PLAYER_MODE);
     
     init_game_screen();
     

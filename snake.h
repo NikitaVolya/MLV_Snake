@@ -1,6 +1,7 @@
 
 #include<stdlib.h>
 #include<stdio.h>
+#include"MLV/MLV_color.h"
 
 #include"vector2i.h"
 
@@ -15,9 +16,10 @@ typedef enum {
 
 typedef struct {
     vector2i items[MAX_SNAKE_SIZE];
-    size_t count, head_index;
+    size_t count, head_index, back_buffer;
     SnakeDirection direction, to_rotate;
     int is_alive;
+    MLV_Color color;
 } Snake;
 
 
@@ -29,12 +31,24 @@ int get_snake_size_i(Snake *snake);
 
 SnakeDirection get_snake_direction(Snake *snake);
 
+SnakeDirection get_snake_next_rotation(Snake *snake);
+
 vector2i* get_snake_part_position(Snake *snake, size_t index);
 
 vector2i* get_snake_head_position(Snake *snake);
 
+void update_snake_back_buffer(Snake *snake);
+
 void move_snake(Snake *snake);
+
+void move_back_snake(Snake *snake);
 
 void move_and_expand_snake(Snake *snake);
 
+void remove_tail_snake(Snake *snake);
+
+void remove_tail_snake(Snake *snake);
+
 void set_snake_direction(Snake *snake, SnakeDirection direction);
+
+void set_snake_color(Snake *snake, MLV_Color color);

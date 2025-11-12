@@ -3,15 +3,23 @@
 
 void init_game(GameConfig *game_config, GAME_MODE game_mode) {
 
-    game_config->first_player = create_snake();
-
-    if (game_mode == GAME_TWO_PLAYER_MODE)
-        game_config->second_player = create_snake();
-
     game_config->move_timer = 1500;
     game_config->next_move = game_config->move_timer;
     game_config->game_mode = game_mode;
 
+    
+    game_config->first_player = create_snake();
+    move_and_expand_snake(&game_config->first_player);
+
+    
+    if (game_mode == GAME_TWO_PLAYER_MODE) {
+        game_config->second_player = create_snake();
+
+        get_snake_head_position(&game_config->second_player)->x = 7;
+        move_and_expand_snake(&game_config->second_player);
+        set_snake_color(&game_config->second_player, MLV_COLOR_BLUE);
+    }
+    
     place_apple(game_config);
 }
 

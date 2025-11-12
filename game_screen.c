@@ -29,7 +29,7 @@ void draw_snake_body(Snake *snake) {
     MLV_Color fill_color;
 
     if (snake->is_alive)
-        fill_color = MLV_COLOR_GREEN;
+        fill_color = snake->color;
     else
         fill_color = MLV_COLOR_GRAY;
 
@@ -104,7 +104,7 @@ void draw_snake_head(Snake *snake, float shift) {
             break;
         }
 
-        MLV_draw_filled_rectangle(h_x, h_y, h_width, h_height, MLV_COLOR_GREEN);
+        MLV_draw_filled_rectangle(h_x, h_y, h_width, h_height, snake->color);
     }
 }
 
@@ -149,7 +149,7 @@ void draw_snake_tail(Snake* snake, float shift) {
             t_height = GRID_CELL_DRAW_SIZE * (1 - shift);
         }
         
-        MLV_draw_filled_rectangle(t_x, t_y, t_width, t_height, MLV_COLOR_GREEN);
+        MLV_draw_filled_rectangle(t_x, t_y, t_width, t_height, snake->color);
     }
 }
 
@@ -166,15 +166,16 @@ void draw_game(GameConfig *config, float shift) {
                 );
 
     draw_snake_body(&config->first_player);
-
     draw_snake_head(&config->first_player, shift);
-
     draw_snake_tail(&config->first_player, shift);
 
-    draw_grid();
-
-    if (config->game_mode == GAME_TWO_PLAYER_MODE)
+    if (config->game_mode == GAME_TWO_PLAYER_MODE) {
         draw_snake_body(&config->second_player);
+        draw_snake_head(&config->second_player, shift);
+        draw_snake_tail(&config->second_player, shift);
+    }
+
+    draw_grid();
 
     MLV_actualise_window();
 }

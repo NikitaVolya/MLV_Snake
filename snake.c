@@ -8,10 +8,13 @@ Snake create_snake() {
         
     rep.count = 1;
     rep.head_index = 0;
+    rep.back_buffer = 0;
     rep.is_alive = 1;
 
     rep.direction = SNAKE_DIRECTION_RIGTH;
     rep.to_rotate = SNAKE_DIRECTION_RIGTH;
+
+    rep.color = MLV_COLOR_GREEN;
 
     return rep;
 }
@@ -26,6 +29,10 @@ int get_snake_size_i(Snake *snake) {
 
 SnakeDirection get_snake_direction(Snake *snake) {
     return snake->direction;
+}
+
+SnakeDirection get_snake_next_rotation(Snake *snake) {
+    return snake->to_rotate;
 }
 
 vector2i* get_snake_part_position(Snake *snake, size_t index) {
@@ -45,11 +52,22 @@ vector2i* get_snake_head_position(Snake *snake) {
     return &snake->items[snake->head_index];
 }
 
+void update_snake_back_buffer(Snake *snake) {
+    size_t max_buffer;
+
+    max_buffer = MAX_SNAKE_SIZE - snake->count;
+    
+    if (snake->back_buffer > max_buffer)
+        snake->back_buffer = max_buffer;
+}
+
 void move_snake(Snake *snake) {
     vector2i next_snake_p;
     size_t next_head_i;
     
     next_snake_p = snake->items[snake->head_index];
+    
+    snake->direction = snake->to_rotate;
 
     switch (snake->to_rotate) {
     case SNAKE_DIRECTION_TOP:
@@ -68,8 +86,6 @@ void move_snake(Snake *snake) {
         break;
     }
     
-    snake->direction = snake->to_rotate;
-    
     if (snake->head_index == 0)
         next_head_i = MAX_SNAKE_SIZE - 1;
     else
@@ -77,6 +93,19 @@ void move_snake(Snake *snake) {
 
     snake->items[next_head_i] = next_snake_p;
     snake->head_index = next_head_i;
+    
+    snake->back_buffer++;
+    update_snake_back_buffer(snake);
+}
+
+void move_back_snake(Snake *snake) {
+    if (snake->back_buffer > 0) {
+        if (snake->head_index == MAX_SNAKE_SIZE - 1)
+            snake->head_index = 0;
+        else
+            snake->head_index++;
+        snake->back_buffer--;
+    }
 }
 
 void move_and_expand_snake(Snake *snake) {
@@ -84,7 +113,17 @@ void move_and_expand_snake(Snake *snake) {
     snake->count++;
 }
 
+void remove_tail_snake(Snake *snake) {
+    snake->count--;
+    snake->back_buffer++;
+}
+
 void set_snake_direction(Snake *snake, SnakeDirection direction) {
     if (snake->direction != -direction)
         snake->to_rotate = direction;
+}
+
+void set_snake_color(Snake *snake, MLV_Color color) {
+    if (color != MLV_COLOR_WHITE && color != MLV_COLOR_RED)
+        snake->color = color;
 }
