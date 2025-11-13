@@ -51,6 +51,10 @@ void game_input(GameConfig* config) {
                     break;
                 case MLV_KEYBOARD_RIGHT:
                     second_player_dir = SNAKE_DIRECTION_RIGTH;
+                    break;
+                case MLV_KEYBOARD_ESCAPE:
+                    show_menu(config);
+                    break;
                 default:
                     break;
                 }
@@ -174,7 +178,7 @@ void game_cycle(GameConfig *config) {
 
     next_move = 0;
     
-    while (1) {
+    while (!config->force_exit) {
 
         clock_gettime(CLOCK_REALTIME, &start_time);
         

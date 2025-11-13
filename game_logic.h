@@ -3,6 +3,7 @@
 #include<time.h>
 #include"game_config.h"
 #include"game_screen.h"
+#include"game_menu.h"
 
 #define FRAMERATE 120
 

@@ -5,6 +5,13 @@
 #include"snake.h"
 #include"vector2i.h"
 
+#define SCREEN_WIDTH 1280
+#define SCREEN_HEIGH 720
+
+#define SCREEN_Y_PADDING ( SCREEN_WIDTH / 20 )
+#define GRID_CELL_DRAW_SIZE ( ( SCREEN_HEIGH - SCREEN_Y_PADDING * 2 ) / GRID_SIZE )
+#define SCREEN_X_PADDING ( ( SCREEN_WIDTH - GRID_CELL_DRAW_SIZE * GRID_SIZE ) / 2 )
+
 #define GRID_SIZE 20
 
 #if (GRID_SIZE * GRID_SIZE) > MAX_SNAKE_SIZE
@@ -21,6 +28,7 @@ typedef struct {
     unsigned long move_timer, next_move;
     Snake first_player, second_player;
     GAME_MODE game_mode;
+    int force_exit;
 } GameConfig;
 
 void init_game(GameConfig *game_config, GAME_MODE game_mode);
