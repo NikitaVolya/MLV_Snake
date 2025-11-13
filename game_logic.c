@@ -89,8 +89,11 @@ int check_apple_eat(GameConfig *config, Snake *snake) {
 
     res = head_p->x == config->apple.x && head_p->y == config->apple.y;
 
-    if (res)
+    if (res) {
         place_apple(config);
+        
+        config->move_timer = config->move_timer * SPEED_UP;
+    }
 
     return res;
 }
@@ -124,48 +127,44 @@ void check_snake_colision(Snake *first, Snake *second) {
     
 }
 
+void update_snake(GameConfig *config, Snake *snake, Snake *others, int count) {
+    int i;
+    
+    if (snake->is_alive) {
+
+        if (check_apple_eat(config, snake))
+            move_and_expand_snake(snake);
+        else
+            move_snake(snake);
+
+        check_outofbounds(snake);
+
+        check_self_snake_colision(snake);
+
+        for (i = 0; i < count && snake->is_alive; i++) {
+            check_snake_colision(snake, others + i);
+        }
+
+        if (!snake->is_alive) {
+            move_back_snake(snake);
+            remove_tail_snake(snake);
+        }
+    }
+}
+
 void update_game(GameConfig *config) {
     
-    if (config->first_player.is_alive) {
-        
-        if (check_apple_eat(config, &config->first_player))
-            move_and_expand_snake(&config->first_player);
-        else
-            move_snake(&config->first_player);
-
-        check_outofbounds(&config->first_player);
-
-        check_self_snake_colision(&config->first_player);
-
-        if (config->game_mode == GAME_TWO_PLAYER_MODE)
-            check_snake_colision(&config->first_player, &config->second_player);
-
-        if (!config->first_player.is_alive) {
-            move_back_snake(&config->first_player);
-            remove_tail_snake(&config->first_player);
-        }
-
+    switch (config->game_mode) {
+    case GAME_SINGLE_PLAYER_MODE:
+        update_snake(config, &config->first_player, NULL, 0);
+        break;
+    case GAME_TWO_PLAYER_MODE:
+        update_snake(config, &config->first_player, &config->second_player, 1);
+        update_snake(config, &config->second_player, &config->first_player, 1);
+        break;
+    default:
+        break;
     }
-
-    
-    if (config->game_mode == GAME_TWO_PLAYER_MODE &&
-        config->second_player.is_alive ) {
-        if (check_apple_eat(config, &config->second_player))
-            move_and_expand_snake(&config->second_player);
-        else
-            move_snake(&config->second_player);
-        
-        check_outofbounds(&config->second_player);
-
-        check_self_snake_colision(&config->second_player);
-        check_snake_colision(&config->second_player, &config->first_player);
-
-        if (!config->second_player.is_alive) {
-            move_back_snake(&config->second_player);
-            remove_tail_snake(&config->second_player);
-        }
-    }
-
 
 }
 
@@ -181,12 +180,13 @@ void game_cycle(GameConfig *config) {
         
         game_input(config);
 
-        if (next_move >= MOVE_TIME) {
+        if (next_move >= config->move_timer) {
             next_move = 0;
             update_game(config);
+
         }
 
-        draw_game(config, (float) next_move / MOVE_TIME);
+        draw_game(config, (float) next_move / config->move_timer);
 
         clock_gettime(CLOCK_REALTIME, &end_time);
 
@@ -198,6 +198,8 @@ void game_cycle(GameConfig *config) {
         } else {
             next_move += delta_time;
         }
+
+        printf("%ld\n", config->move_timer);
     }
     
 }
@@ -207,6 +209,8 @@ void start() {
     GameConfig config;
 
     init_game(&config, GAME_TWO_PLAYER_MODE);
+
+    config.move_timer = MOVE_TIME;
     
     init_game_screen();
     

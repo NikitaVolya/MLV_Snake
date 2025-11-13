@@ -4,12 +4,14 @@
 #include"game_config.h"
 #include"game_screen.h"
 
-#define FRAMERATE 60
+#define FRAMERATE 120
 
 #define MSEC_IN_NSEC 1000000UL
 #define SEC_IN_NSEC ( 1000LU * MSEC_IN_NSEC )
 #define DRAW_TIME ( SEC_IN_NSEC / FRAMERATE )
 #define MOVE_TIME ( 300UL * MSEC_IN_NSEC )
+
+#define SPEED_UP 498 / 500
 
 
 void game_input(GameConfig *config);
