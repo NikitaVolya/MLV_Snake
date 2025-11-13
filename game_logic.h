@@ -5,7 +5,7 @@
 #include"game_screen.h"
 #include"game_menu.h"
 
-#define FRAMERATE 120
+#define FRAMERATE 60
 
 #define MSEC_IN_NSEC 1000000UL
 #define SEC_IN_NSEC ( 1000LU * MSEC_IN_NSEC )

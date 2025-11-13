@@ -7,6 +7,7 @@
 #include<MLV/MLV_all.h>
 
 #include"game_config.h"
+#include"game_serializer.h"
 #include"mlv_button.h"
 
 #define MENU_POSS_X ( SCREEN_WIDTH / 3 )

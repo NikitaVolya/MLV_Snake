@@ -9,7 +9,7 @@ void show_menu_screen(GameConfig *config) {
 
 void show_menu(GameConfig *config) {
     vector2i mouse_p, tmp_p, btn_size;
-    MLV_Button continue_btn, stop_btn;
+    MLV_Button continue_btn, stop_btn, save_btn, load_btn;
     MLV_Button_state mouse_state;
     int menu_dialog;
 
@@ -17,9 +17,16 @@ void show_menu(GameConfig *config) {
     btn_size = create_vector2i(MENU_WIDTH - MENU_PADDDING * 2, MENU_PADDDING);
 
     continue_btn = MLV_create_base_button("continue", tmp_p, btn_size);
+
+    tmp_p.y += MENU_PADDDING + MENU_BUTTON_HEIGHT;
+    save_btn = MLV_create_base_button("save", tmp_p, btn_size);
+
+    tmp_p.y += MENU_PADDDING + MENU_BUTTON_HEIGHT;
+    load_btn = MLV_create_base_button("load", tmp_p, btn_size);
+    
     tmp_p.y += MENU_PADDDING + MENU_BUTTON_HEIGHT;
     stop_btn = MLV_create_base_button("stop", tmp_p, btn_size);
-
+    
     menu_dialog = 1;
 
     while (menu_dialog) {
@@ -35,6 +42,8 @@ void show_menu(GameConfig *config) {
                                   MLV_COLOR_BLACK);
 
         MLV_draw_button(&continue_btn, &mouse_p);
+        MLV_draw_button(&save_btn, &mouse_p);
+        MLV_draw_button(&load_btn, &mouse_p);
         MLV_draw_button(&stop_btn, &mouse_p);
 
         MLV_actualise_window();
@@ -48,6 +57,16 @@ void show_menu(GameConfig *config) {
 
             if (MLV_mouse_is_on_button(&stop_btn, &mouse_p)) {
                 config->force_exit = 1;
+                menu_dialog = 0;
+            }
+
+            if (MLV_mouse_is_on_button(&save_btn, &mouse_p)) {
+                serialize_game("save.bin", config);
+                menu_dialog = 0;
+            }
+
+            if (MLV_mouse_is_on_button(&load_btn, &mouse_p)) {
+                deserialize_game("save.bin", config);
                 menu_dialog = 0;
             }
         }
