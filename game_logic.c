@@ -207,18 +207,3 @@ void game_cycle(GameConfig *config) {
     }
     
 }
-
-
-void start() {
-    GameConfig config;
-
-    init_game(&config, GAME_TWO_PLAYER_MODE);
-
-    config.move_timer = MOVE_TIME;
-    
-    init_game_screen();
-    
-    game_cycle(&config);
-
-    free_game_screen();
-}

@@ -2,7 +2,7 @@
 #include<stdio.h>
 #include<time.h>
 
-#include"game_logic.h"
+#include"game_menu.h"
 
 
 
@@ -10,7 +10,7 @@ int main() {
     
     srand(time(NULL));
 
-    start();
+    show_menu_screen();
     
     exit(EXIT_SUCCESS);
 }

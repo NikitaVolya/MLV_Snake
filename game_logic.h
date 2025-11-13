@@ -1,4 +1,7 @@
 
+#ifndef _GAME_LOGIC_H
+#define _GAME_LOGIC_H
+
 #include<stdlib.h>
 #include<time.h>
 #include"game_config.h"
@@ -30,3 +33,6 @@ void update_game(GameConfig *config);
 void game_cycle(GameConfig *config);
 
 void start();
+
+
+#endif /* _GAME_LOGIC_H */

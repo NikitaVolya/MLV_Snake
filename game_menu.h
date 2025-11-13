@@ -7,6 +7,7 @@
 #include<MLV/MLV_all.h>
 
 #include"game_config.h"
+#include"game_logic.h"
 #include"game_serializer.h"
 #include"mlv_button.h"
 
@@ -18,7 +19,7 @@
 #define MENU_BUTTON_HEIGHT 40
 
 
-void show_menu_screen(GameConfig *config);
+void show_menu_screen();
 
 void show_menu(GameConfig *config);
 
