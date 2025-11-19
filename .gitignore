@@ -2,3 +2,4 @@ snake_game
 *.o
 *.d
 save.bin
+doc/
