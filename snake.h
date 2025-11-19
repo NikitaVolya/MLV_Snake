@@ -32,6 +32,43 @@ typedef enum {
  * @brief Stores all properties and movement state of the snake.
  *
  * The snake is represented as a circular buffer storing body segment positions.
+ * 
+ * ## Principle of Operation
+ * The snake's body segments are stored in a circular buffer `items` with a fixed
+ * maximum size `MAX_SNAKE_SIZE`. The `head_index` points to the current head of
+ * the snake, and `count` represents the number of segments currently in the snake.
+ * 
+ * The `back_buffer` stores the number of previous positions behind the tail that
+ * are still kept in memory. This allows the snake to "retrace" its movement if
+ * needed (for example, for movement reversal). As the snake moves forward,
+ * `back_buffer` increases but cannot exceed `MAX_SNAKE_SIZE - count`.
+ * 
+ * Each time the snake moves, the head moves forward in the buffer (incrementing
+ * `head_index`). If the head reaches the end of the buffer, it wraps around
+ * to the beginning (circular behavior), allowing the snake to continue moving
+ * without exceeding the fixed buffer size.
+ * 
+ * ### Visual representation of circular buffer
+ * Suppose MAX_SNAKE_SIZE = 8, count = 5, back_buffer = 2:
+ * 
+ *     Index:   0 1 2 3 4 5 6 7
+ *     Buffer:  S T O O . H S S
+ *
+ * Next move:
+ *
+ *     Index:   0 1 2 3 4 5 6 7
+ *     Buffer:  T O O O H S S S
+ * 
+ * - H = head
+ * - S = body segment
+ * - T = tail
+ * - O = old position (stored in back_buffer)
+ * - . = free space
+ * 
+ * Here, the snake occupies 5 segments (count = 5). The `back_buffer` indicates
+ * 2->3 positions behind the tail that still exist in memory (not yet overwritten).
+ * The head moves forward each step and wraps around to index 0 when it reaches
+ * the end of the buffer.
  */
 typedef struct {
     vector2i items[MAX_SNAKE_SIZE];        /**< Circular buffer of snake body segment positions. */

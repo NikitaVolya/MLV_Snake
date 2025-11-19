@@ -68,8 +68,13 @@ int MLV_mouse_is_on_button(MLV_Button *button, vector2i *mouse_p);
 /**
  * @brief Draws the button on the screen, highlighting if hovered.
  *
+ * This function draws a button with its text and background. If the mouse
+ * pointer is over the button, it will be highlighted using the
+ * `highlight_color`. If the mouse position pointer is `NULL`, the button
+ * will be drawn without any highlight.
+ *
  * @param[in] button Pointer to the button to draw.
- * @param[in] mouse_p Current mouse position vector.
+ * @param[in] mouse_p Current mouse position vector. Pass NULL to skip highlighting.
  */
 void MLV_draw_button(MLV_Button *button, vector2i *mouse_p);
 
