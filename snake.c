@@ -23,10 +23,6 @@ size_t get_snake_size(Snake *snake) {
     return snake->count;
 }
 
-int get_snake_size_i(Snake *snake) {
-    return (int) snake->count;
-}
-
 SnakeDirection get_snake_direction(Snake *snake) {
     return snake->direction;
 }
@@ -39,7 +35,7 @@ vector2i* get_snake_part_position(Snake *snake, size_t index) {
     size_t real_index;
 
     if (snake->count <= index) {
-        fprintf(stderr, "Snake part position out of bounds");
+        fprintf(stderr, "Error get_snake_part_position: Snake part position out of bounds");
         exit(EXIT_FAILURE);
     }
     
@@ -114,6 +110,12 @@ void move_and_expand_snake(Snake *snake) {
 }
 
 void remove_tail_snake(Snake *snake) {
+
+    if (snake->count == 1) {
+        fprintf(stderr, "Error remove_tail_snake: snake is to small to remove tail");
+        exit(EXIT_FAILURE);
+    }
+    
     snake->count--;
     snake->back_buffer++;
 }

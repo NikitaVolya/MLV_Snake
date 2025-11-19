@@ -1,137 +1,142 @@
+/**
+ * @file vector2i.h
+ * @brief Utility functions and structures for working with 2D integer vectors.
+ *
+ * This file provides a simple 2D integer vector type (`vector2i`) and
+ * common operations such as addition, subtraction, scaling, normalization,
+ * distance calculation, and component-wise transformations.  
+ *
+ * These helpers are designed for use in grid-based and coordinate-based systems,
+ * such as games, physics simulations, and general spatial computations.
+ */
 
-#ifndef VECTOR2I_H
-#define VECTOR2I_H
+#ifndef _VECTOR2I_H_
+#define _VECTOR2I_H_
 
 #include<math.h>
 
+
+/**
+ * @struct vector2i
+ * @brief Represents a 2D integer vector.
+ */
 struct vector2i
 {
-    int x, y;
+    int x; /**< X coordinate */
+    int y; /**< Y coordinate */
 };
 typedef struct vector2i vector2i;
 
-/* 
-    Creates a 2D integer vector.
-    input:    x, y - integer coordinates
-    output:   vector2i structure with given coordinates
-*/
+/**
+ * @brief Creates a 2D integer vector with given coordinates.
+ *
+ * @param[in] x X coordinate.
+ * @param[in] y Y coordinate.
+ * @return A vector2i containing the specified coordinates.
+ */
 vector2i create_vector2i(int x, int y);
 
-/* 
-    Creates a 2D integer vector with both coordinates set to zero.
-
-    input:    none
-    output:   vector2i(0, 0)
-*/
+/**
+ * @brief Creates a 2D vector with coordinates set to (0, 0).
+ *
+ * @return A zero vector (0, 0).
+ */
 vector2i create_zero_vector2i();
 
-/* 
-    Adds two 2D integer vectors.
-
-    input:    a, b - vectors to add
-    output:   sum of the two vectors
-*/
+/**
+ * @brief Adds two 2D integer vectors.
+ *
+ * @param[in] a First vector.
+ * @param[in] b Second vector.
+ * @return The sum of both vectors (a + b).
+ */
 vector2i add_vector2i(vector2i a, vector2i b);
 
-/* 
-    Subtracts one 2D integer vector from another.
-
-    input:    a, b - vectors to subtract (a - b)
-    output:   result of subtraction
-*/
+/**
+ * @brief Subtracts vector b from vector a.
+ *
+ * @param[in] a Minuend vector.
+ * @param[in] b Subtrahend vector.
+ * @return The result of subtraction (a - b).
+ */
 vector2i sub_vector2i(vector2i a, vector2i b);
 
-/* 
-    Multiplies a 2D integer vector by an integer scalar.
-
-    input:    vector - source vector
-              value  - scalar multiplier
-    output:   scaled vector
-*/
+/**
+ * @brief Multiplies a vector by an integer scalar.
+ *
+ * @param[in] vector Input vector.
+ * @param[in] value Integer multiplier.
+ * @return The scaled vector.
+ */
 vector2i mult_vector2i(vector2i vector, int value);
 
-/* 
-    Returns a vector with absolute values of both coordinates.
-
-    input:    vector - source vector
-    output:   vector with absolute coordinates
-*/
+/**
+ * @brief Converts both coordinates to their absolute values.
+ *
+ * @param[in] vector Input vector.
+ * @return The absolute-value version of the vector.
+ */
 vector2i abs_vector2i(vector2i vector);
 
-/* 
-    Applies a function to each component of a 2D integer vector and returns the result.
-
-    input:    vector - source vector
-              fptr   - pointer to a function that takes and returns an int
-    output:   new vector with transformed components
-*/
+/**
+ * @brief Applies a transformation function to each coordinate of a vector.
+ *
+ * @param[in] vector Input vector.
+ * @param[in] fptr Pointer to a function taking an `int` and returning an `int`.
+ * @return A new vector with both coordinates transformed by the function.
+ */
 vector2i foreach_vector2i(vector2i vector, int(*fptr)(int));
 
-/*  
-    Calculates the vector difference from point a to point b.
 
-    input:
-        a - starting point (vector2i)
-        b - ending point (vector2i)
-
-    output:
-        returns a vector2i representing the difference (b - a)
-*/
+/**
+ * @brief Computes the vector difference from point a to point b.
+ *
+ * @param[in] a Starting point.
+ * @param[in] b Ending point.
+ * @return A vector representing the difference (b - a).
+ */
 vector2i get_vector2i_to(vector2i a, vector2i b);
 
-/*  
-    Converts a vector into its normalized direction.
-
-    input:
-        vector - a vector2i representing a movement or offset
-
-    output:
-        returns a vector2i where each component is -1, 0, or 1 
-        representing the direction along x and y axes
-
-    behavior:
-        - If vector.x or vector.y is zero, the corresponding direction is 0.
-        - If vector.x or vector.y is positive, the direction is 1.
-        - If vector.x or vector.y is negative, the direction is -1.
-        - Useful for iterating step-by-step along a path in a grid.
-*/
+/**
+ * @brief Normalizes the vector into direction components (-1, 0, or 1).
+ *
+ * @param[in] vector Input vector.
+ * @return A direction vector where each component is -1, 0, or 1.
+ *
+ * @details
+ * - If vector.x > 0 → direction.x = 1  
+ * - If vector.x < 0 → direction.x = -1  
+ * - If vector.x = 0 → direction.x = 0  
+ *
+ * The same rules apply to the Y coordinate.
+ */
 vector2i get_direction(vector2i vector);
 
-/*  
-    Computes the normalized direction vector from point a to point b.
-
-    input:
-        a - starting position (vector2i)
-        b - target position (vector2i)
-
-    output:
-        returns a vector2i with components -1, 0, or 1
-        representing the step direction along x and y axes
-*/
+/**
+ * @brief Returns the normalized direction from point a to point b.
+ *
+ * @param[in] a Starting point.
+ * @param[in] b Target point.
+ * @return A vector with each component equal to -1, 0, or 1.
+ */
 vector2i get_direction_to(vector2i a, vector2i b);
 
-/*  
-    Calculates the Euclidean length (magnitude) of a 2D vector.
-
-    input:
-        vector - the input vector (vector2i)
-
-    output:
-        returns the length of the vector
-*/
+/**
+ * @brief Computes the Euclidean length (magnitude) of a vector.
+ *
+ * @param[in] vector Input vector.
+ * @return The length of the vector as a float.
+ */
 float vector2i_get_length(vector2i vector);
 
-/*  
-    Calculates the Euclidean distance between two 2D points.
 
-    input:
-        a - the first point (vector2i)
-        b - the second point (vector2i)
-
-    output:
-        returns the distance between points a and b as a floating-point value
-*/
-
+/**
+ * @brief Computes the Euclidean distance between two 2D points.
+ *
+ * @param[in] a First point.
+ * @param[in] b Second point.
+ * @return The distance between the two points.
+ */
 float vector2i_get_distance(vector2i a, vector2i b);
 
-#endif
+#endif /* _VECTOR2I_H_ */
