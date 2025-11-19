@@ -14,6 +14,8 @@ typedef struct {
     MLV_Color fill_color, text_color, highlight_color;
 } MLV_Button;
 
+MLV_Button MLV_create_button_with_font();
+
 MLV_Button MLV_create_button(const char *text,
                              vector2i pos, vector2i size,
                              MLV_Color fill_color, MLV_Color text_color,

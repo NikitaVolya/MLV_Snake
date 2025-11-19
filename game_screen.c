@@ -89,17 +89,17 @@ void draw_snake_head(Snake *snake, float shift) {
         switch(get_snake_direction(snake)) {
         case SNAKE_DIRECTION_LEFT:
             h_x += (1 - shift) * GRID_CELL_DRAW_SIZE;
-            h_width = GRID_CELL_DRAW_SIZE * shift;
+            h_width = GRID_CELL_DRAW_SIZE * shift + 1;
             break;
         case SNAKE_DIRECTION_RIGTH:
-            h_width = GRID_CELL_DRAW_SIZE * shift;
+            h_width = GRID_CELL_DRAW_SIZE * shift + 1;
             break;
         case SNAKE_DIRECTION_TOP:
             h_y += (1 - shift) * GRID_CELL_DRAW_SIZE;
-            h_height = GRID_CELL_DRAW_SIZE * shift;
+            h_height = GRID_CELL_DRAW_SIZE * shift + 1;
             break;
         case SNAKE_DIRECTION_BOTTOM:
-            h_height = GRID_CELL_DRAW_SIZE * shift;
+            h_height = GRID_CELL_DRAW_SIZE * shift + 1;
         default:
             break;
         }
@@ -139,14 +139,14 @@ void draw_snake_tail(Snake* snake, float shift) {
 
         if (delta_v.x == 1 || delta_v.x < -1) {
             t_x += GRID_CELL_DRAW_SIZE * shift;
-            t_width = GRID_CELL_DRAW_SIZE * (1 - shift);
+            t_width = GRID_CELL_DRAW_SIZE * (1 - shift) + 1;
         } else if (delta_v.x == -1 || delta_v.x > 1) {
-            t_width = GRID_CELL_DRAW_SIZE * (1 - shift);
+            t_width = GRID_CELL_DRAW_SIZE * (1 - shift) + 1;
         } else if (delta_v.y == 1 || delta_v.y < -1) {
             t_y += GRID_CELL_DRAW_SIZE * shift;
-            t_height = GRID_CELL_DRAW_SIZE * (1 - shift);
+            t_height = GRID_CELL_DRAW_SIZE * (1 - shift) + 1;
         } else if (delta_v.y == -1 || delta_v.y > 1) {
-            t_height = GRID_CELL_DRAW_SIZE * (1 - shift);
+            t_height = GRID_CELL_DRAW_SIZE * (1 - shift) + 1;
         }
         
         MLV_draw_filled_rectangle(t_x, t_y, t_width, t_height, snake->color);
@@ -175,7 +175,12 @@ void draw_game(GameConfig *config, float shift) {
         draw_snake_tail(&config->second_player, shift);
     }
 
-    draw_grid();
+    /* draw_grid(); */
+
+    MLV_draw_rectangle(SCREEN_X_PADDING, SCREEN_Y_PADDING,
+                       GRID_SIZE * GRID_CELL_DRAW_SIZE,
+                       GRID_SIZE * GRID_CELL_DRAW_SIZE,
+                       MLV_COLOR_BLACK);
 
     MLV_actualise_window();
 }
