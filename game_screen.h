@@ -25,7 +25,7 @@ void draw_grid();
  *
  * @param[in] snake Pointer to the Snake structure.
  */
-void draw_snake_body(Snake *snake);
+void draw_snake_body(Snake *snake, float shift);
 
 /**
  * @brief Draws the snake's head with smooth movement based on shift.

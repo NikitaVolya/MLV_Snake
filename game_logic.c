@@ -194,7 +194,7 @@ void game_cycle(GameConfig *config) {
 
         clock_gettime(CLOCK_REALTIME, &end_time);
 
-        delta_time = (end_time.tv_sec - start_time.tv_sec) * SEC_IN_NSEC + (end_time.tv_nsec - start_time.tv_nsec);;
+        delta_time = (end_time.tv_sec - start_time.tv_sec) * SEC_IN_NSEC + (end_time.tv_nsec - start_time.tv_nsec);
 
         if (delta_time <= DRAW_TIME) {
             MLV_wait_milliseconds((DRAW_TIME - delta_time) / MSEC_IN_NSEC);
@@ -202,8 +202,6 @@ void game_cycle(GameConfig *config) {
         } else {
             next_move += delta_time;
         }
-
-        printf("%ld\n", config->move_timer);
     }
     
 }

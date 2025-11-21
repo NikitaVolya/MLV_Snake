@@ -9,8 +9,10 @@
 
 #include<stdlib.h>
 #include<stdio.h>
-#include"MLV/MLV_color.h"
 
+#include"MLV/MLV_color.h"
+#include"MLV/MLV_image.h"
+#include"game_setup.h"
 #include"vector2i.h"
 
 #define MAX_SNAKE_SIZE 900
@@ -26,6 +28,13 @@ typedef enum {
     SNAKE_DIRECTION_LEFT = -2,
     SNAKE_DIRECTION_RIGTH = 2
 } SnakeDirection;
+
+typedef struct {
+    MLV_Image *head;
+    MLV_Image *tail;
+    MLV_Image *straight_body;
+    MLV_Image *rotate_body;
+} SnakeSprite;
 
 /**
  * @struct Snake
@@ -79,7 +88,11 @@ typedef struct {
     SnakeDirection to_rotate;              /**< Next direction change requested by user input. */
     int is_alive;                          /**< Boolean flag indicating if the snake is alive. */
     MLV_Color color;                       /**< Color used to render the snake. */
+
+    SnakeSprite sprite;
 } Snake;
+
+void load_snake_sprite(SnakeSprite* sprite, const char *path);
 
 /**
  * @brief Initializes and returns a new default snake with size 1 in position 0:0.
@@ -199,3 +212,5 @@ void set_snake_direction(Snake *snake, SnakeDirection direction);
  * @param[in] color New color to apply.
  */
 void set_snake_color(Snake *snake, MLV_Color color);
+
+void free_snake(Snake *snake);

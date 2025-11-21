@@ -26,7 +26,6 @@ void show_menu_screen() {
     tmp_p.y += MENU_PADDDING + MENU_BUTTON_HEIGHT;
     exit_btn = MLV_create_base_button("exit", tmp_p, btn_size);
     
-
     menu_dialog = 1;
 
     while (menu_dialog) {
@@ -50,12 +49,15 @@ void show_menu_screen() {
                 init_game(&config, GAME_SINGLE_PLAYER_MODE);
                 config.move_timer = MOVE_TIME;
                 game_cycle(&config);
+                free_snake(&config.first_player);
             }
 
             if (MLV_mouse_is_on_button(&start_two_player_btn, &mouse_p)) {
                 init_game(&config, GAME_TWO_PLAYER_MODE);
                 config.move_timer = MOVE_TIME;
                 game_cycle(&config);
+                free_snake(&config.first_player);
+                free_snake(&config.second_player);
             }
 
             if (MLV_mouse_is_on_button(&load_btn, &mouse_p)) {

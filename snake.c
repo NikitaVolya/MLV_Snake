@@ -1,10 +1,42 @@
 #include"snake.h"
 
+#define SNAKE_PART_SIZE (32)
+
+void load_snake_sprite(SnakeSprite *sprite, const char *path) {
+    MLV_Image *image;
+
+    image = MLV_load_image(path);
+
+    sprite->head = MLV_copy_partial_image(image,
+                                          SNAKE_PART_SIZE * 2, 0,
+                                          SNAKE_PART_SIZE, SNAKE_PART_SIZE);
+    
+    sprite->straight_body = MLV_copy_partial_image(image,
+                                          SNAKE_PART_SIZE * 1, 0,
+                                          SNAKE_PART_SIZE, SNAKE_PART_SIZE);
+    
+    sprite->rotate_body = MLV_copy_partial_image(image,
+                                          0, 0,
+                                          SNAKE_PART_SIZE, SNAKE_PART_SIZE);
+
+    sprite->tail = MLV_copy_partial_image(image,
+                                          0, SNAKE_PART_SIZE * 2,
+                                          SNAKE_PART_SIZE, SNAKE_PART_SIZE);
+
+    MLV_resize_image(sprite->head, GRID_CELL_DRAW_SIZE, GRID_CELL_DRAW_SIZE);
+    MLV_resize_image(sprite->straight_body, GRID_CELL_DRAW_SIZE, GRID_CELL_DRAW_SIZE);
+    MLV_resize_image(sprite->rotate_body, GRID_CELL_DRAW_SIZE, GRID_CELL_DRAW_SIZE);
+    MLV_resize_image(sprite->tail, GRID_CELL_DRAW_SIZE, GRID_CELL_DRAW_SIZE);
+
+
+    MLV_free_image(image);
+}
+
 Snake create_snake() {
     Snake rep;
 
     rep.items[0].x = 0;
-    rep.items[0].y = 0;
+    rep.items[0].y = 2;
         
     rep.count = 1;
     rep.head_index = 0;
@@ -15,6 +47,8 @@ Snake create_snake() {
     rep.to_rotate = SNAKE_DIRECTION_RIGTH;
 
     rep.color = MLV_COLOR_GREEN;
+
+    load_snake_sprite(&rep.sprite, "ressources/snake/snake012.png");
 
     return rep;
 }
@@ -128,4 +162,11 @@ void set_snake_direction(Snake *snake, SnakeDirection direction) {
 void set_snake_color(Snake *snake, MLV_Color color) {
     if (color != MLV_COLOR_WHITE && color != MLV_COLOR_RED)
         snake->color = color;
+}
+
+void free_snake(Snake *snake) {
+    MLV_free_image(snake->sprite.head);
+    MLV_free_image(snake->sprite.tail);
+    MLV_free_image(snake->sprite.straight_body);
+    MLV_free_image(snake->sprite.rotate_body);
 }
