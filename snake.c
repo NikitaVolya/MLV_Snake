@@ -8,7 +8,8 @@ void load_snake_sprite(Snake *snake, int index) {
     char path[35];
 
     if (index < MIN_SNAKE_SPRITE_INDEX || index > MAX_SNAKE_SPRITE_INDEX) {
-        fprintf(stderr, "Warining : snake sprite index out of bounds\nset sprite index to 0\n");
+        fprintf(stderr, "Warining : snake sprite index %d out of bounds\nset sprite index to 0\n", index);
+        index = 0;
     }
 
     sprite = &snake->sprite;
@@ -60,6 +61,8 @@ void load_snake_sprite(Snake *snake, int index) {
     MLV_resize_image(sprite->tail, GRID_CELL_DRAW_SIZE, GRID_CELL_DRAW_SIZE);
 
     MLV_free_image(image);
+
+    snake->sprite_index = index;
 }
 
 Snake create_snake() {
@@ -83,7 +86,7 @@ Snake create_snake() {
     rep.sprite.rotate_body = NULL;
     rep.sprite.tail = NULL;
 
-    load_snake_sprite(&rep, rand() % (MAX_SNAKE_SPRITE_INDEX + 1));
+    load_snake_sprite(&rep, 15);
 
     return rep;
 }

@@ -92,6 +92,7 @@ typedef struct {
  * the end of the buffer.
  */
 typedef struct {
+
     vector2i items[MAX_SNAKE_SIZE];        /**< Circular buffer of snake body segment positions. */
     size_t count;                          /**< Current number of snake segments. */
     size_t head_index;                     /**< Index of the head within the buffer. */
@@ -99,8 +100,8 @@ typedef struct {
     SnakeDirection direction;              /**< Current direction of movement. */
     SnakeDirection to_rotate;              /**< Next direction change requested by user input. */
     int is_alive;                          /**< Boolean flag indicating if the snake is alive. */
+    
     MLV_Color color;                       /**< Color used to render the snake. */
-
     SnakeSprite sprite;
     int sprite_index;
 } Snake;
