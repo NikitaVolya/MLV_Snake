@@ -3,3 +3,6 @@ snake_game
 *.d
 save.bin
 doc/
+.vs/
+.idea/
+.history/

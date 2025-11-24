@@ -29,11 +29,19 @@ typedef enum {
     SNAKE_DIRECTION_RIGTH = 2
 } SnakeDirection;
 
+/**
+ * @struct SnakeSprite
+ * @brief Holds all sprite images used for rendering the snake.
+ *
+ * This structure groups together the different image assets required
+ * to draw the snake, including the head, tail, straight body segments,
+ * and curved body segments used during turns.
+ */
 typedef struct {
-    MLV_Image *head;
-    MLV_Image *tail;
-    MLV_Image *straight_body;
-    MLV_Image *rotate_body;
+    MLV_Image *head;          /**< Image of the snake's head. */
+    MLV_Image *tail;          /**< Image of the snake's tail. */
+    MLV_Image *straight_body; /**< Image used for straight body segments. */
+    MLV_Image *rotate_body;   /**< Image used for curved/turn body segments. */
 } SnakeSprite;
 
 /**
@@ -92,6 +100,19 @@ typedef struct {
     SnakeSprite sprite;
 } Snake;
 
+/**
+ * @brief Loads and initializes all snake sprite sub-images.
+ *
+ * This function loads a full sprite sheet from the given file path,
+ * extracts the individual images (head, straight body, rotated body, tail).
+ *
+ * If the SnakeSprite already contains images, they are safely freed
+ * before loading the new ones.
+ *
+ * @param[in,out] sprite Pointer to the SnakeSprite structure to modify.
+ *                       Existing images inside will be freed and replaced.
+ * @param[in]     path   Path to the sprite sheet image file to load.
+ */
 void load_snake_sprite(SnakeSprite* sprite, const char *path);
 
 /**

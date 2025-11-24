@@ -24,6 +24,7 @@ void draw_grid();
  * @brief Draws the body segments of the snake (excluding head and tail).
  *
  * @param[in] snake Pointer to the Snake structure.
+ * @param[in] shift Fraction of movement between cells (0.0 to 1.0).
  */
 void draw_snake_body(Snake *snake, float shift);
 

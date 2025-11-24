@@ -51,17 +51,16 @@ void draw_snake_body(Snake *snake, float shift) {
 
             delta_p = sub_vector2i(*next_p, *back_p);
 
-            s_x = SCREEN_X_PADDING + GRID_CELL_DRAW_SIZE * tmp_p->x + 1;
-            s_y = SCREEN_Y_PADDING + GRID_CELL_DRAW_SIZE * tmp_p->y + 1;
+            s_x = SCREEN_X_PADDING + GRID_CELL_DRAW_SIZE * tmp_p->x;
+            s_y = SCREEN_Y_PADDING + GRID_CELL_DRAW_SIZE * tmp_p->y;
 
             direction = SNAKE_DIRECTION_RIGTH;
             h_swap = 0;
             
             if (delta_p.x == 0 || delta_p.y == 0) {
-                
                 image = MLV_copy_image(snake->sprite.straight_body);
 
-                if (delta_p.y == 2 ||delta_p.y < -2) {
+                if (delta_p.y == 2 || delta_p.y < -2) {
                     direction = SNAKE_DIRECTION_BOTTOM;
                 }
                 else if (delta_p.y == -2 || delta_p.y > 2) {
@@ -70,18 +69,16 @@ void draw_snake_body(Snake *snake, float shift) {
                 else if (delta_p.x < 0) {
                     direction = SNAKE_DIRECTION_LEFT;
                 }
-                
 
                 if (i == 1) {
                     delete_image_part(image,
-                                      GRID_CELL_DRAW_SIZE * shift, 0,
+                                      GRID_CELL_DRAW_SIZE * (shift + 0.3f > 1.f ? 1.f : shift + 0.3f), 0,
                                       GRID_CELL_DRAW_SIZE, GRID_CELL_DRAW_SIZE);
                 }
-                
+            
             } else {
                 image = MLV_copy_image(snake->sprite.rotate_body);
 
-                
                 /* top left | left top */
                 if ((delta_p.y == -1 || delta_p.y > 1) &&
                     (delta_p.x == -1 || delta_p.x > 1)) {
@@ -131,10 +128,12 @@ void draw_snake_body(Snake *snake, float shift) {
 
             switch(direction) {
             case SNAKE_DIRECTION_TOP:
-                MLV_rotate_image(image, 90);
+                MLV_rotate_image(image, 90.f);
+                MLV_scale_xy_image(image, 1.f, 1.2f);
                 break;
             case SNAKE_DIRECTION_BOTTOM:
-                MLV_rotate_image(image, -90);
+                MLV_rotate_image(image, -90.f);
+                MLV_scale_xy_image(image, 1.f, 1.2f);
                 break;
             case SNAKE_DIRECTION_LEFT:
                 MLV_vertical_image_mirror(image);
@@ -177,11 +176,11 @@ void draw_snake_head(Snake *snake, float shift) {
             break;
         case SNAKE_DIRECTION_TOP:
             s_y += (1 - shift) * GRID_CELL_DRAW_SIZE;
-            MLV_rotate_image(image, 90.0);
+            MLV_rotate_image(image, 90.f);
             break;
         case SNAKE_DIRECTION_BOTTOM:
             s_y += GRID_CELL_DRAW_SIZE * (shift - 1.f) + 1;
-            MLV_rotate_image(image, -90.0);
+            MLV_rotate_image(image, -90.f);
             break;
         default:
             break;

@@ -1,11 +1,30 @@
 #include"snake.h"
 
-#define SNAKE_PART_SIZE (32)
+#define SNAKE_PART_SIZE ( 32 )
 
 void load_snake_sprite(SnakeSprite *sprite, const char *path) {
     MLV_Image *image;
 
+    if (sprite->head != NULL)
+        MLV_free_image(sprite->head);
+    
+    if (sprite->straight_body != NULL)
+        MLV_free_image(sprite->straight_body);
+    
+    if (sprite->rotate_body != NULL)
+        MLV_free_image(sprite->rotate_body);
+    
+    if (sprite->tail != NULL)
+        MLV_free_image(sprite->tail);
+
+
     image = MLV_load_image(path);
+    if (image == NULL) {
+        fprintf(stderr, "Error : snake sprite not found\n");
+        exit(EXIT_FAILURE);
+    }
+
+    printf("%d : %d\n", SNAKE_PART_SIZE, GRID_CELL_DRAW_SIZE);
 
     sprite->head = MLV_copy_partial_image(image,
                                           SNAKE_PART_SIZE * 2, 0,
@@ -28,7 +47,6 @@ void load_snake_sprite(SnakeSprite *sprite, const char *path) {
     MLV_resize_image(sprite->rotate_body, GRID_CELL_DRAW_SIZE, GRID_CELL_DRAW_SIZE);
     MLV_resize_image(sprite->tail, GRID_CELL_DRAW_SIZE, GRID_CELL_DRAW_SIZE);
 
-
     MLV_free_image(image);
 }
 
@@ -47,6 +65,11 @@ Snake create_snake() {
     rep.to_rotate = SNAKE_DIRECTION_RIGTH;
 
     rep.color = MLV_COLOR_GREEN;
+
+    rep.sprite.head = NULL;
+    rep.sprite.straight_body = NULL;
+    rep.sprite.rotate_body = NULL;
+    rep.sprite.tail = NULL;
 
     load_snake_sprite(&rep.sprite, "ressources/snake/snake012.png");
 
