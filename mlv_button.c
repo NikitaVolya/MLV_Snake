@@ -1,14 +1,16 @@
 #include"mlv_button.h"
 
-MLV_Button MLV_create_button(const char *text,
-                             vector2i pos, vector2i size,
-                             MLV_Color fill_color, MLV_Color text_color, MLV_Color highlight_color) {
+MLV_Button MLV_create_button_with_font(const char *text, const char *font, int font_size,
+                                       vector2i pos, vector2i size,
+                                       MLV_Color fill_color, MLV_Color text_color, MLV_Color highlight_color) {
     MLV_Button res;
 
     strcpy(res.text, text);
 
     res.pos = pos;
     res.size = size;
+
+    res.font = MLV_load_font(font, font_size);
     
     res.fill_color = fill_color;
     res.text_color = text_color;
@@ -17,8 +19,13 @@ MLV_Button MLV_create_button(const char *text,
     return res;
 }
 
-MLV_Button MLV_create_base_button(const char *text,
-                                  vector2i pos, vector2i size) {
+MLV_Button MLV_create_button(const char *text,
+                             vector2i pos, vector2i size,
+                             MLV_Color fill_color, MLV_Color text_color, MLV_Color highlight_color) {
+    return MLV_create_button_with_font(text, "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 10, pos, size, fill_color, text_color, highlight_color);
+}
+
+MLV_Button MLV_create_base_button(const char *text, vector2i pos, vector2i size) {
     return MLV_create_button(text, pos, size, MLV_COLOR_WHITE, MLV_COLOR_BLACK, MLV_COLOR_GRAY);
 }
 
@@ -46,10 +53,13 @@ void MLV_draw_button(MLV_Button *button, vector2i *mouse_p) {
         fill_color = button->fill_color;
     }
 
-    MLV_draw_text_box(button->pos.x, button->pos.y,
+    MLV_draw_text_box_with_font(button->pos.x, button->pos.y,
                       button->size.x, button->size.y,
-                      button->text, 1,
-                      MLV_COLOR_BLACK, MLV_COLOR_BLACK, fill_color,
+                                button->text, button->font, 1,
+                      MLV_COLOR_BLACK, button->text_color, fill_color,
                       MLV_TEXT_CENTER, MLV_HORIZONTAL_CENTER, MLV_VERTICAL_CENTER);
-    
+}
+
+void MLV_free_button(MLV_Button *button) {
+    MLV_free_font(button->font);
 }

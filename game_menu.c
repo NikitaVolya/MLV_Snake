@@ -1,4 +1,5 @@
 #include"game_menu.h"
+#include"mlv_button.h"
 
 void show_menu_screen() {
     vector2i mouse_p, tmp_p, btn_size;
@@ -6,32 +7,82 @@ void show_menu_screen() {
     MLV_Button_state mouse_state;
     int button_width, menu_dialog;
     GameConfig config;
-
+    MLV_Color menu_button_color;
+    MLV_Color menu_text_color;
+    MLV_Color menu_highlight_color;
+    
+    
     init_game_screen();
 
-    button_width = SCREEN_WIDTH / 4;
+    button_width = SCREEN_WIDTH / 3;
     
-    tmp_p = create_vector2i(SCREEN_WIDTH / 2 - button_width / 2, SCREEN_Y_PADDING);
-    btn_size = create_vector2i(button_width, MENU_BUTTON_HEIGHT);
+    menu_button_color = MLV_COLOR_WHITE;
+    menu_text_color = MLV_COLOR_BLUE;
+    menu_highlight_color = MLV_COLOR_GREEN;
+    
+    tmp_p = create_vector2i(SCREEN_WIDTH / 2 - button_width / 2, SCREEN_HEIGH / 4);
+    btn_size = create_vector2i(button_width, MENU_BUTTON_HEIGHT * 1.5);
 
-    start_signle_btn = MLV_create_base_button("start single game", tmp_p, btn_size);
+    start_signle_btn = MLV_create_button("Single Player", tmp_p, btn_size, menu_button_color, menu_text_color, menu_highlight_color);
 
+    tmp_p.y += MENU_PADDDING + MENU_BUTTON_HEIGHT;
+    start_two_player_btn = MLV_create_button("Two Player", tmp_p, btn_size, menu_button_color, menu_text_color, menu_highlight_color);
+
+    tmp_p.y += MENU_PADDDING + MENU_BUTTON_HEIGHT;
+    load_btn = MLV_create_button("Load Last Game", tmp_p, btn_size, menu_button_color, menu_text_color, menu_highlight_color);
     
     tmp_p.y += MENU_PADDDING + MENU_BUTTON_HEIGHT;
-    start_two_player_btn = MLV_create_base_button("start two player game", tmp_p, btn_size);
-
-    tmp_p.y += MENU_PADDDING + MENU_BUTTON_HEIGHT;
-    load_btn = MLV_create_base_button("load", tmp_p, btn_size);
-    
-    tmp_p.y += MENU_PADDDING + MENU_BUTTON_HEIGHT;
-    exit_btn = MLV_create_base_button("exit", tmp_p, btn_size);
+    exit_btn = MLV_create_button("Exit Game", tmp_p, btn_size, menu_button_color, menu_text_color, menu_highlight_color);
     
     menu_dialog = 1;
 
     while (menu_dialog) {
-        
-        MLV_clear_window(MLV_COLOR_WHITE);
 
+        int tile;
+        int title_height;
+        int x, y;
+        int r;
+        MLV_Color color1;
+        MLV_Color color2;
+        MLV_Color color3;
+        MLV_Color color4;
+        MLV_Color title1;
+        MLV_Color title2;
+
+        title1 = MLV_rgba(100, 181, 246, 255);             ;
+        title2 = MLV_rgba(66, 165, 245, 255);
+        color1 = MLV_rgba(129, 199, 132, 255);
+        color2 = MLV_rgba(102, 187, 106, 255);
+        color3 = MLV_rgba(76, 175, 80, 255);
+        color4 = MLV_rgba(67, 160, 71, 255);
+        tile = 16;
+        
+        title_height = SCREEN_HEIGH / 6;
+
+        for (y = 0; y < SCREEN_HEIGH; y += tile) {
+            for (x = 0; x < SCREEN_WIDTH; x += tile) {
+                if (y < title_height) {
+                    if ((x+y) % 16 < 8) {
+                        r = rand() % 2;
+                        if (r == 0)
+                            MLV_draw_filled_rectangle(x, y, tile, tile, title1);
+                        else if (r == 1)
+                            MLV_draw_filled_rectangle(x, y, tile, tile, title2);
+                    }
+                }else {
+                    r = rand() % 6;
+                    if (r == 0)
+                        MLV_draw_filled_rectangle(x, y, tile, tile, color1);
+                    else if (r == 1)
+                        MLV_draw_filled_rectangle(x, y, tile, tile, color2);
+                    else if (r == 2)
+                        MLV_draw_filled_rectangle(x, y, tile, tile, color3);
+                    else
+                        MLV_draw_filled_rectangle(x, y, tile, tile, color4);
+                }
+            }
+        }
+    
         MLV_get_mouse_position(&mouse_p.x, &mouse_p.y);
 
         MLV_draw_button(&start_signle_btn, &mouse_p);
@@ -71,8 +122,12 @@ void show_menu_screen() {
             }
         }
 
+        MLV_wait_milliseconds(100);
     }
-    
+    MLV_free_button(&load_btn);
+    MLV_free_button(&start_signle_btn);
+    MLV_free_button(&start_two_player_btn);
+    MLV_free_button(&exit_btn);
     free_game_screen();
 }
 
@@ -86,16 +141,16 @@ void show_menu(GameConfig *config) {
     tmp_p = create_vector2i(MENU_POSS_X + MENU_PADDDING, MENU_POSS_Y + MENU_PADDDING);
     btn_size = create_vector2i(MENU_WIDTH - MENU_PADDDING * 2, MENU_PADDDING);
 
-    continue_btn = MLV_create_base_button("continue", tmp_p, btn_size);
+    continue_btn = MLV_create_base_button("Continue", tmp_p, btn_size);
 
     tmp_p.y += MENU_PADDDING + MENU_BUTTON_HEIGHT;
-    save_btn = MLV_create_base_button("save", tmp_p, btn_size);
+    save_btn = MLV_create_base_button("Save Game", tmp_p, btn_size);
 
     tmp_p.y += MENU_PADDDING + MENU_BUTTON_HEIGHT;
-    load_btn = MLV_create_base_button("load", tmp_p, btn_size);
+    load_btn = MLV_create_base_button("Load Game", tmp_p, btn_size);
     
     tmp_p.y += MENU_PADDDING + MENU_BUTTON_HEIGHT;
-    stop_btn = MLV_create_base_button("stop", tmp_p, btn_size);
+    stop_btn = MLV_create_base_button("Stop Game", tmp_p, btn_size);
     
     menu_dialog = 1;
 
