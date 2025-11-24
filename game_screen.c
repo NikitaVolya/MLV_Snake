@@ -33,6 +33,23 @@ void delete_image_part(MLV_Image *image, int x, int y, int width, int height) {
     }
 }
 
+void custom_rotate_right_image(MLV_Image *source) {
+    int height, width, i, j, r, g, b, a;
+    MLV_Image *tmp;
+
+    MLV_get_image_size(source, &width, &height);
+    tmp = MLV_copy_image(source);
+
+    for (i = 0; i < height; i++) {
+        for (j = 0; j < width; j++) {
+            MLV_get_pixel_on_image(tmp, j, i, &r, &g, &b, &a);
+            MLV_set_pixel_on_image(i, j, MLV_rgba(r, g, b, a), source);
+        }
+    }
+
+    MLV_free_image(tmp);
+}
+
 void draw_straigth_body_part(SnakeSprite *sprite, vector2i delta_p, int x, int y, int index, float shift) {
     MLV_Image *image;
 
@@ -49,19 +66,17 @@ void draw_straigth_body_part(SnakeSprite *sprite, vector2i delta_p, int x, int y
 
     /* bottom rotation */
     if (delta_p.y == 2 || delta_p.y < -2) {
-        MLV_rotate_image(image, -90.f);
-        MLV_scale_xy_image(image, 1.f, 1.2f);
+        custom_rotate_right_image(image);
     }
     /* top rotation */
     else if (delta_p.y == -2 || delta_p.y > 2) {
-        MLV_rotate_image(image, 90.f);
-        MLV_scale_xy_image(image, 1.f, 1.2f);
+        custom_rotate_right_image(image);
+        MLV_horizontal_image_mirror(image);
     }
     /* left rotation */
     else if (delta_p.x == -2 || delta_p.x > 2) {
         MLV_vertical_image_mirror(image);
     }
-    
     
     MLV_draw_image(image, x, y);
     MLV_free_image(image);
@@ -162,11 +177,12 @@ void draw_snake_head(Snake *snake, float shift) {
             break;
         case SNAKE_DIRECTION_TOP:
             s_y += (1 - shift) * GRID_CELL_DRAW_SIZE;
-            MLV_rotate_image(image, 90.f);
+            custom_rotate_right_image(image);
+            MLV_horizontal_image_mirror(image);
             break;
         case SNAKE_DIRECTION_BOTTOM:
             s_y += GRID_CELL_DRAW_SIZE * (shift - 1.f) + 1;
-            MLV_rotate_image(image, -90.f);
+            custom_rotate_right_image(image);
             break;
         default:
             break;
