@@ -7,6 +7,7 @@ void init_game(GameConfig *game_config, GAME_MODE game_mode) {
     game_config->next_move = game_config->move_timer;
     game_config->game_mode = game_mode;
     game_config->force_exit = 0;
+    game_config->score = 0;
 
     
     game_config->first_player = create_snake();

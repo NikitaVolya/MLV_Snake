@@ -1,7 +1,5 @@
 #include"game_logic.h"
 
-
-
 void game_input(GameConfig* config) {
     MLV_Event event;
     MLV_Keyboard_modifier mod;
@@ -85,6 +83,37 @@ void check_outofbounds(Snake *snake) {
         head_p->y = 0;
 }
 
+void load_score(unsigned int *score_list) {
+    int i;
+
+    if (!deserialize_game_score("score.bin", score_list, GAME_SCORE_LIST_SIZE)) {
+        for (i = 0; i < GAME_SCORE_LIST_SIZE; i++) {
+            score_list[i] = 0;
+        }
+    }
+}
+
+void update_score_list(unsigned int new_score) {
+    int i = 0, stop;
+    unsigned int tmp, score_list[GAME_SCORE_LIST_SIZE];
+
+    load_score(score_list);
+
+    stop = 0;
+
+    for (i = 0; i < GAME_SCORE_LIST_SIZE && !stop; i++) {
+        if (score_list[i] == new_score) {
+            stop = 1;
+        } else if (score_list[i] < new_score) {
+            tmp = score_list[i];
+            score_list[i] = new_score;
+            new_score = tmp;
+        }
+    }
+
+    serialize_game_score("score.bin", score_list, GAME_SCORE_LIST_SIZE);
+}
+
 int check_apple_eat(GameConfig *config, Snake *snake) {
     vector2i *head_p;
     int res;
@@ -95,7 +124,8 @@ int check_apple_eat(GameConfig *config, Snake *snake) {
 
     if (res) {
         place_apple(config);
-        
+        config->score += 10;
+
         config->move_timer = config->move_timer * SPEED_UP;
     }
 
@@ -142,7 +172,6 @@ void update_snake(GameConfig *config, Snake *snake, Snake *others, int count) {
             move_snake(snake);
 
         check_outofbounds(snake);
-
         check_self_snake_colision(snake);
 
         for (i = 0; i < count && snake->is_alive; i++) {
@@ -172,11 +201,15 @@ void update_game(GameConfig *config) {
 
 }
 
+
 void game_cycle(GameConfig *config) {
     struct timespec start_time, end_time;
     unsigned long delta_time, next_move;
+    unsigned int score_list[GAME_SCORE_LIST_SIZE];
 
     next_move = 0;
+
+    load_score(score_list);
     
     while (!config->force_exit) {
 
@@ -190,7 +223,7 @@ void game_cycle(GameConfig *config) {
 
         }
 
-        draw_game(config, (float) next_move / config->move_timer);
+        draw_game(config, score_list, (float) next_move / config->move_timer);
 
         clock_gettime(CLOCK_REALTIME, &end_time);
 
@@ -202,6 +235,11 @@ void game_cycle(GameConfig *config) {
         } else {
             next_move += delta_time;
         }
+
+        if (!config->first_player.is_alive && 
+            config->game_mode == GAME_SINGLE_PLAYER_MODE) {
+            update_score_list(config->score);
+            config->force_exit = 1;
+        }
     }
-    
 }

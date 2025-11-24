@@ -1,7 +1,7 @@
 snake_game
 *.o
 *.d
-save.bin
+*.bin
 doc/
 .vs/
 .idea/

@@ -1,6 +1,36 @@
 #include"game_serializer.h"
 
 
+int serialize_game_score(const char *file_name, unsigned int *score_list, int n) {
+    FILE *file;
+    int res;
+    
+    file = fopen(file_name, "w");
+    if (file == NULL) {
+        res = 0;
+    } else {
+        res = 1;
+        fwrite(score_list, sizeof(unsigned int), n, file);
+        fclose(file);
+    }
+
+    return res;
+}
+
+int deserialize_game_score(const char *file_name, unsigned int *score_list, int n) {
+    FILE *file;
+    int res;
+
+    file = fopen(file_name, "r");
+    if (file != NULL && fread(score_list, sizeof(unsigned int), n, file)) {
+        res = 1;
+    } else {
+        res = 0;
+    }
+
+    return res;
+}
+
 int serialize_game(const char *file_name, GameConfig *config) {
     FILE *file;
     int res;
@@ -38,8 +68,6 @@ int deserialize_game(const char *file_name, GameConfig *config) {
             config->first_player.sprite.straight_body = NULL;
             config->first_player.sprite.rotate_body = NULL;
             config->first_player.sprite.tail = NULL;
-
-            printf("%ld\n", config->first_player.count);
 
             load_snake_sprite(&config->first_player, config->first_player.sprite_index);
             

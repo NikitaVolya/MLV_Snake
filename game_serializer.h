@@ -11,6 +11,10 @@
 
 #include"game_config.h"
 
+int serialize_game_score(const char *file_name, unsigned int *score_list, int n);
+
+int deserialize_game_score(const char *file_name, unsigned int *score_list, int n);
+
 /**
  * @brief Saves the current game configuration to a file.
  *

@@ -7,27 +7,25 @@ void load_snake_sprite(Snake *snake, int index) {
     MLV_Image *image;
     char path[35];
 
+    sprite = &snake->sprite;
+
     if (index < MIN_SNAKE_SPRITE_INDEX || index > MAX_SNAKE_SPRITE_INDEX) {
         fprintf(stderr, "Warining : snake sprite index %d out of bounds\nset sprite index to 0\n", index);
         index = 0;
     }
 
-    sprite = &snake->sprite;
-
-    strcpy(path, SNAKE_SPRITE_BASE_PATH);
-
+    /* free used memory */
     if (sprite->head != NULL)
         MLV_free_image(sprite->head);
-    
     if (sprite->straight_body != NULL)
         MLV_free_image(sprite->straight_body);
-    
     if (sprite->rotate_body != NULL)
         MLV_free_image(sprite->rotate_body);
-    
     if (sprite->tail != NULL)
         MLV_free_image(sprite->tail);
 
+    /* set image path */
+    strcpy(path, SNAKE_SPRITE_BASE_PATH);
     path[SNAKE_SPRITE_NUMBER_INDEX] = '0' + index % 10;
     path[SNAKE_SPRITE_NUMBER_INDEX - 1] = '0' + index / 10 % 10;
     path[SNAKE_SPRITE_NUMBER_INDEX - 2] = '0' + index / 100 % 10;

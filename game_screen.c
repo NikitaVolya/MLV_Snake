@@ -150,6 +150,43 @@ void draw_snake_body(Snake *snake, float shift) {
     
 }
 
+void draw_score(unsigned int score) {
+    int i;
+    char text[10];
+
+    strcpy(text, "         ");
+
+    if (score == 0) text[9] = '0'; 
+
+    for(i = 9; i >= 0 && score > 0; i--) {
+        text[i] = '0' + score % 10;
+        score /= 10;
+    }
+
+    MLV_draw_text(0, 0, text, MLV_COLOR_BLACK);
+}
+
+void draw_score_list(unsigned int *score_list) {
+    int i, j;
+    unsigned int value;
+    char text[13];
+
+    for (i = 0; i < GAME_SCORE_LIST_SIZE && score_list[i] > 0; i++) {
+
+        strcpy(text, "  .         ");
+        if (i == 9) text[0] = '1';
+        text[1] = '0' + (i + 1) % 10;
+
+        value = score_list[i];
+        for (j = 12; j > 0 && value > 0; j--) {
+            text[j] = '0' + value % 10;
+            value /= 10;
+        }
+        
+        MLV_draw_text(0, i * 20 + 200, text, MLV_COLOR_BLACK);
+    }
+}
+
 void draw_snake_head(Snake *snake, float shift) {
     vector2i *head_p;
     int s_x, s_y;
@@ -194,7 +231,7 @@ void draw_snake_head(Snake *snake, float shift) {
     }
 }
 
-void draw_game(GameConfig *config, float shift) {
+void draw_game(GameConfig *config, unsigned int *score_list, float shift) {
 
     MLV_clear_window(MLV_COLOR_WHITE);
 
@@ -230,6 +267,9 @@ void draw_game(GameConfig *config, float shift) {
                        GRID_SIZE * GRID_CELL_DRAW_SIZE,
                        GRID_SIZE * GRID_CELL_DRAW_SIZE,
                        MLV_COLOR_BLACK);
+
+    draw_score(config->score);
+    draw_score_list(score_list);
 
     MLV_actualise_window();
 }

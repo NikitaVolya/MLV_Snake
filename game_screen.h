@@ -8,6 +8,7 @@
  */
 
 #include <MLV/MLV_all.h>
+#include <string.h>
 #include "game_config.h"
 
 /**
@@ -42,7 +43,7 @@ void draw_snake_head(Snake *snake, float shift);
  * @param[in] config Pointer to the GameConfig structure.
  * @param[in] shift Fraction of movement between cells for smooth animation.
  */
-void draw_game(GameConfig *config, float shift);
+void draw_game(GameConfig *config, unsigned int *score_list, float shift);
 
 /**
  * @brief Frees the game window and related resources.

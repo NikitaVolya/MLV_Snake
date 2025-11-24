@@ -10,6 +10,8 @@
 #ifndef _GAME_CONFIG_H
 #define _GAME_CONFIG_H
 
+#define GAME_SCORE_LIST_SIZE 10
+
 #include"snake.h"
 #include"vector2i.h"
 #include"game_setup.h"
@@ -39,6 +41,8 @@ typedef struct {
     Snake second_player;       /**< Second player's snake (only used in two-player mode) */
     GAME_MODE game_mode;       /**< Selected game mode */
     int force_exit;            /**< Flag to force exit the game loop */
+
+    unsigned int score;
 } GameConfig;
 
 /**
