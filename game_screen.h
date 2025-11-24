@@ -37,14 +37,6 @@ void draw_snake_body(Snake *snake, float shift);
 void draw_snake_head(Snake *snake, float shift);
 
 /**
- * @brief Draws the snake's tail with smooth movement based on shift.
- *
- * @param[in] snake Pointer to the Snake structure.
- * @param[in] shift Fraction of movement between cells (0.0 to 1.0).
- */
-void draw_snake_tail(Snake *snake, float shift);
-
-/**
  * @brief Draws the complete game screen (grid, apple, snakes).
  *
  * @param[in] config Pointer to the GameConfig structure.

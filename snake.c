@@ -24,8 +24,6 @@ void load_snake_sprite(SnakeSprite *sprite, const char *path) {
         exit(EXIT_FAILURE);
     }
 
-    printf("%d : %d\n", SNAKE_PART_SIZE, GRID_CELL_DRAW_SIZE);
-
     sprite->head = MLV_copy_partial_image(image,
                                           SNAKE_PART_SIZE * 2, 0,
                                           SNAKE_PART_SIZE, SNAKE_PART_SIZE);

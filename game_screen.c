@@ -33,16 +33,84 @@ void delete_image_part(MLV_Image *image, int x, int y, int width, int height) {
     }
 }
 
+void draw_straigth_body_part(SnakeSprite *sprite, vector2i delta_p, int x, int y, int index, float shift) {
+    MLV_Image *image;
+
+    image = MLV_copy_image(sprite->straight_body);
+
+    /* shift part next to head */
+    if (index == 1 && 
+        delta_p.x * delta_p.x <= 4 && 
+        delta_p.y * delta_p.y <= 4) {
+        delete_image_part(image,
+                            GRID_CELL_DRAW_SIZE * (shift + 0.22f > 1.f ? 1.f : shift + 0.22f), 0,
+                            GRID_CELL_DRAW_SIZE, GRID_CELL_DRAW_SIZE);
+    }
+
+    /* bottom rotation */
+    if (delta_p.y == 2 || delta_p.y < -2) {
+        MLV_rotate_image(image, -90.f);
+        MLV_scale_xy_image(image, 1.f, 1.2f);
+    }
+    /* top rotation */
+    else if (delta_p.y == -2 || delta_p.y > 2) {
+        MLV_rotate_image(image, 90.f);
+        MLV_scale_xy_image(image, 1.f, 1.2f);
+    }
+    /* left rotation */
+    else if (delta_p.x == -2 || delta_p.x > 2) {
+        MLV_vertical_image_mirror(image);
+    }
+    
+    
+    MLV_draw_image(image, x, y);
+    MLV_free_image(image);
+}
+
+void draw_rotated_body_part(SnakeSprite *sprite, vector2i delta_p, int x, int y, int up) {
+    MLV_Image *image;
+
+    image = MLV_copy_image(sprite->rotate_body);
+
+    if (!up) {
+        delta_p.x *= -1;
+        delta_p.y *= -1;
+    }
+
+    if        ((delta_p.x == -1 || delta_p.x >  1) && (delta_p.y == -1 || delta_p.y >  1)) {
+        MLV_vertical_image_mirror(image);
+    } else if ((delta_p.x ==  1 || delta_p.x < -1) && (delta_p.y ==  1 || delta_p.y < -1)) {
+        MLV_horizontal_image_mirror(image);
+    } else if ((delta_p.x == -1 || delta_p.x >  1) && (delta_p.y ==  1 || delta_p.y < -1)) {
+        MLV_vertical_image_mirror(image);
+        MLV_horizontal_image_mirror(image);
+    }
+
+    MLV_draw_image(image, x, y);
+    MLV_free_image(image);
+}
+
 void draw_snake_body(Snake *snake, float shift) {
     size_t i, snake_size;
-    int s_x, s_y, h_swap;
+    int s_x, s_y;
     vector2i *tmp_p, *back_p, *next_p, delta_p;
-    SnakeDirection direction;
-    MLV_Image *image;
 
     snake_size = get_snake_size(snake);
 
-    if (snake_size > 2) {
+    /* Unalive state */
+    if (!snake->is_alive) {
+
+        for (i = 0; i < snake_size; i++) {
+
+            tmp_p = get_snake_part_position(snake, i);
+
+            s_x = SCREEN_X_PADDING + GRID_CELL_DRAW_SIZE * tmp_p->x;
+            s_y = SCREEN_Y_PADDING + GRID_CELL_DRAW_SIZE * tmp_p->y;
+            
+            MLV_draw_filled_rectangle(s_x, s_y, GRID_CELL_DRAW_SIZE, GRID_CELL_DRAW_SIZE, MLV_COLOR_GRAY);
+        }
+    /* Live state */
+    } else if (snake_size > 2) {
         for (i = 1; i < snake_size - 1; i++) {
 
             back_p = get_snake_part_position(snake, i + 1);
@@ -53,97 +121,15 @@ void draw_snake_body(Snake *snake, float shift) {
 
             s_x = SCREEN_X_PADDING + GRID_CELL_DRAW_SIZE * tmp_p->x;
             s_y = SCREEN_Y_PADDING + GRID_CELL_DRAW_SIZE * tmp_p->y;
-
-            direction = SNAKE_DIRECTION_RIGTH;
-            h_swap = 0;
             
+            /* draw straight part */
             if (delta_p.x == 0 || delta_p.y == 0) {
-                image = MLV_copy_image(snake->sprite.straight_body);
-
-                if (delta_p.y == 2 || delta_p.y < -2) {
-                    direction = SNAKE_DIRECTION_BOTTOM;
-                }
-                else if (delta_p.y == -2 || delta_p.y > 2) {
-                    direction = SNAKE_DIRECTION_TOP;
-                }
-                else if (delta_p.x < 0) {
-                    direction = SNAKE_DIRECTION_LEFT;
-                }
-
-                if (i == 1) {
-                    delete_image_part(image,
-                                      GRID_CELL_DRAW_SIZE * (shift + 0.3f > 1.f ? 1.f : shift + 0.3f), 0,
-                                      GRID_CELL_DRAW_SIZE, GRID_CELL_DRAW_SIZE);
-                }
-            
+                draw_straigth_body_part(&snake->sprite, delta_p, s_x, s_y, i, shift);
+            /* draw rotated part */
             } else {
-                image = MLV_copy_image(snake->sprite.rotate_body);
-
-                /* top left | left top */
-                if ((delta_p.y == -1 || delta_p.y > 1) &&
-                    (delta_p.x == -1 || delta_p.x > 1)) {
-                    if (back_p->y != tmp_p->y) {
-                        direction = SNAKE_DIRECTION_LEFT;
-                    } else {
-                        direction = SNAKE_DIRECTION_RIGTH;
-                        h_swap = 1;
-                    }
-                }
-                /* top right | right top */
-                else if ((delta_p.y == -1 || delta_p.y >  1) &&
-                         (delta_p.x ==  1 || delta_p.x < -1)) {
-                    if (back_p->y != tmp_p->y) {
-                        direction = SNAKE_DIRECTION_RIGTH;
-                    } else {
-                        direction = SNAKE_DIRECTION_LEFT;
-                        h_swap = 1;
-                    }
-                }
-                /* left bottom | bottom left */
-                else if ((delta_p.y ==  1 || delta_p.y < -1) &&
-                         (delta_p.x == -1 || delta_p.x >  1)) {
-                    if (back_p->x == tmp_p->x) {
-                        direction = SNAKE_DIRECTION_LEFT;
-                        h_swap = 1;
-                    } else {
-                        direction = SNAKE_DIRECTION_RIGTH;
-                    }
-                }
-                /* right botton | bottom right */
-                else if ((delta_p.y == 1 || delta_p.y < -1) &&
-                         (delta_p.x == 1 || delta_p.x < -1)) {
-                    if (back_p->x == tmp_p->x) {
-                        direction = SNAKE_DIRECTION_RIGTH;
-                        h_swap = 1;
-                    } else {
-                        direction = SNAKE_DIRECTION_LEFT;
-                    } 
-                }
-                   
-            }
-
-            if (h_swap) {
-                MLV_horizontal_image_mirror(image);
-            }
-
-            switch(direction) {
-            case SNAKE_DIRECTION_TOP:
-                MLV_rotate_image(image, 90.f);
-                MLV_scale_xy_image(image, 1.f, 1.2f);
-                break;
-            case SNAKE_DIRECTION_BOTTOM:
-                MLV_rotate_image(image, -90.f);
-                MLV_scale_xy_image(image, 1.f, 1.2f);
-                break;
-            case SNAKE_DIRECTION_LEFT:
-                MLV_vertical_image_mirror(image);
-                break;
-            default:
-                break;
+                draw_rotated_body_part(&snake->sprite, delta_p, s_x, s_y, back_p->y != tmp_p->y);
             }
             
-            MLV_draw_image(image, s_x, s_y);
-            MLV_free_image(image);
         }
     }
     
@@ -192,44 +178,6 @@ void draw_snake_head(Snake *snake, float shift) {
     }
 }
 
-void draw_snake_tail(Snake* snake, float shift) {
-    vector2i *tail_p, *body_p, delta_v;
-    size_t size;
-    int s_x, s_y;
-    MLV_Image *image;
-
-    size = get_snake_size(snake);
-
-    if (size > 2) {
-
-        image = MLV_copy_image(snake->sprite.tail);
-
-        tail_p = get_snake_part_position(snake, size - 1);
-        body_p = get_snake_part_position(snake, size - 2);
-        delta_v = sub_vector2i(*body_p, *tail_p);
-        
-        s_x = SCREEN_X_PADDING + GRID_CELL_DRAW_SIZE * tail_p->x;
-        s_y = SCREEN_Y_PADDING + GRID_CELL_DRAW_SIZE * tail_p->y;
-        
-        if (delta_v.x == 1 || delta_v.x < -1) {
-            s_x += GRID_CELL_DRAW_SIZE * shift;
-        } else if (delta_v.x == -1 || delta_v.x > 1) {
-            s_x -= GRID_CELL_DRAW_SIZE * shift;
-            MLV_vertical_image_mirror(image);
-        } else if (delta_v.y == 1 || delta_v.y < -1) {
-            s_y += GRID_CELL_DRAW_SIZE * shift;
-            MLV_rotate_image(image, -90.f);
-        } else if (delta_v.y == -1 || delta_v.y > 1) {
-            s_y -= GRID_CELL_DRAW_SIZE * shift;
-            MLV_rotate_image(image, 90.f);
-        }
-        
-        MLV_draw_image(image, s_x, s_y);
-
-        MLV_free_image(image);
-    }
-}
-
 void draw_game(GameConfig *config, float shift) {
 
     MLV_clear_window(MLV_COLOR_WHITE);
@@ -243,17 +191,25 @@ void draw_game(GameConfig *config, float shift) {
                 );
 
     draw_snake_body(&config->first_player, shift);
-    /*draw_snake_tail(&config->first_player, shift); */
     draw_snake_head(&config->first_player, shift);
 
     if (config->game_mode == GAME_TWO_PLAYER_MODE) {
         draw_snake_body(&config->second_player, shift);
         draw_snake_head(&config->second_player, shift);
-        draw_snake_tail(&config->second_player, shift);
     }
 
     /* draw_grid(); */
 
+
+    MLV_draw_filled_rectangle(0, 0, SCREEN_WIDTH, SCREEN_Y_PADDING, MLV_COLOR_WHITE);
+    MLV_draw_filled_rectangle(0, SCREEN_Y_PADDING + GRID_SIZE * GRID_CELL_DRAW_SIZE, 
+                              SCREEN_WIDTH, SCREEN_Y_PADDING, 
+                              MLV_COLOR_WHITE);
+    MLV_draw_filled_rectangle(0, 0, SCREEN_X_PADDING, SCREEN_HEIGH, MLV_COLOR_WHITE);
+    MLV_draw_filled_rectangle(SCREEN_X_PADDING + GRID_CELL_DRAW_SIZE * GRID_SIZE, 0, 
+                              SCREEN_WIDTH, SCREEN_HEIGH, MLV_COLOR_WHITE);
+
+    /* Border */
     MLV_draw_rectangle(SCREEN_X_PADDING, SCREEN_Y_PADDING,
                        GRID_SIZE * GRID_CELL_DRAW_SIZE,
                        GRID_SIZE * GRID_CELL_DRAW_SIZE,
