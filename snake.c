@@ -2,8 +2,18 @@
 
 #define SNAKE_PART_SIZE ( 32 )
 
-void load_snake_sprite(SnakeSprite *sprite, const char *path) {
+void load_snake_sprite(Snake *snake, int index) {
+    SnakeSprite *sprite;
     MLV_Image *image;
+    char path[35];
+
+    if (index < MIN_SNAKE_SPRITE_INDEX || index > MAX_SNAKE_SPRITE_INDEX) {
+        fprintf(stderr, "Warining : snake sprite index out of bounds\nset sprite index to 0\n");
+    }
+
+    sprite = &snake->sprite;
+
+    strcpy(path, SNAKE_SPRITE_BASE_PATH);
 
     if (sprite->head != NULL)
         MLV_free_image(sprite->head);
@@ -17,7 +27,11 @@ void load_snake_sprite(SnakeSprite *sprite, const char *path) {
     if (sprite->tail != NULL)
         MLV_free_image(sprite->tail);
 
+    path[SNAKE_SPRITE_NUMBER_INDEX] = '0' + index % 10;
+    path[SNAKE_SPRITE_NUMBER_INDEX - 1] = '0' + index / 10 % 10;
+    path[SNAKE_SPRITE_NUMBER_INDEX - 2] = '0' + index / 100 % 10;
 
+    printf("Load snake sprite %s\n", path);
     image = MLV_load_image(path);
     if (image == NULL) {
         fprintf(stderr, "Error : snake sprite not found\n");
@@ -69,7 +83,7 @@ Snake create_snake() {
     rep.sprite.rotate_body = NULL;
     rep.sprite.tail = NULL;
 
-    load_snake_sprite(&rep.sprite, "ressources/snake/snake012.png");
+    load_snake_sprite(&rep, rand() % (MAX_SNAKE_SPRITE_INDEX + 1));
 
     return rep;
 }

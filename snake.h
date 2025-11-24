@@ -9,6 +9,7 @@
 
 #include<stdlib.h>
 #include<stdio.h>
+#include<string.h>
 
 #include"MLV/MLV_color.h"
 #include"MLV/MLV_image.h"
@@ -16,7 +17,10 @@
 #include"vector2i.h"
 
 #define MAX_SNAKE_SIZE 900
-
+#define MIN_SNAKE_SPRITE_INDEX 0
+#define MAX_SNAKE_SPRITE_INDEX 15
+#define SNAKE_SPRITE_BASE_PATH "ressources/snake/snake000.png"
+#define SNAKE_SPRITE_NUMBER_INDEX 24
 
 /**
  * @enum SnakeDirection
@@ -98,6 +102,7 @@ typedef struct {
     MLV_Color color;                       /**< Color used to render the snake. */
 
     SnakeSprite sprite;
+    int sprite_index;
 } Snake;
 
 /**
@@ -111,9 +116,9 @@ typedef struct {
  *
  * @param[in,out] sprite Pointer to the SnakeSprite structure to modify.
  *                       Existing images inside will be freed and replaced.
- * @param[in]     path   Path to the sprite sheet image file to load.
+ * @param[in]     index  Index of sprite file to load.
  */
-void load_snake_sprite(SnakeSprite* sprite, const char *path);
+void load_snake_sprite(Snake* snake, int index);
 
 /**
  * @brief Initializes and returns a new default snake with size 1 in position 0:0.
