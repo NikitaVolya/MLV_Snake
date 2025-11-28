@@ -13,6 +13,8 @@
 #include<stdlib.h>
 #include<stdio.h>
 #include<MLV/MLV_all.h>
+#include <math.h>
+#include <stdint.h>
 
 #include"game_config.h"
 #include"game_logic.h"

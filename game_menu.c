@@ -1,5 +1,42 @@
 #include"game_menu.h"
-#include"mlv_button.h"
+
+
+float hash(float n) {
+    return fmodf(sinf(n) * 43758.5453123f, 1.0f); 
+}
+
+float noise(float x, float y, float t) {
+    float fx = floorf(x), fy = floorf(y);
+
+    float a = hash(fx + fy * 57.0f + t * 13.0f);
+    float b = hash(fx + 1.0f + fy * 57.0f + t * 13.0f);
+    float c = hash(fx + (fy + 1.0f) * 57.0f + t * 13.0f);
+    float d = hash(fx + 1.0f + (fy + 1.0f) * 57.0f + t * 13.0f);
+
+    float u = x - fx;
+    float v = y - fy;
+
+    float ux = u * u * (3 - 2 * u);
+    float vy = v * v * (3 - 2 * v);
+
+    float lerp1 = a + (b - a) * ux;
+    float lerp2 = c + (d - c) * ux;
+
+    return lerp1 + (lerp2 - lerp1) * vy;
+}
+
+MLV_Color noise_color(float x, float y, float r, float g, float b, float time, float min_color, float max_color) {
+    float n;
+
+    n = noise(x * 0.1f, y * 0.1f, time * 0.3f);
+
+    r *= min_color + n * (max_color - min_color);
+    g *= min_color + n * (max_color - min_color);
+    b *= min_color + n * (max_color - min_color);
+
+    return MLV_rgba(r, g, b, 255);
+}
+
 
 void show_menu_screen() {
     vector2i mouse_p, tmp_p, btn_size;
@@ -10,6 +47,10 @@ void show_menu_screen() {
     MLV_Color menu_button_color;
     MLV_Color menu_text_color;
     MLV_Color menu_highlight_color;
+    unsigned long time;
+    int tile;
+    int title_height;
+    int x, y;
     
     
     init_game_screen();
@@ -35,50 +76,20 @@ void show_menu_screen() {
     exit_btn = MLV_create_button("Exit Game", tmp_p, btn_size, menu_button_color, menu_text_color, menu_highlight_color);
     
     menu_dialog = 1;
+    time = 0;
 
     while (menu_dialog) {
 
-        int tile;
-        int title_height;
-        int x, y;
-        int r;
-        MLV_Color color1;
-        MLV_Color color2;
-        MLV_Color color3;
-        MLV_Color color4;
-        MLV_Color title1;
-        MLV_Color title2;
-
-        title1 = MLV_rgba(100, 181, 246, 255);             ;
-        title2 = MLV_rgba(66, 165, 245, 255);
-        color1 = MLV_rgba(129, 199, 132, 255);
-        color2 = MLV_rgba(102, 187, 106, 255);
-        color3 = MLV_rgba(76, 175, 80, 255);
-        color4 = MLV_rgba(67, 160, 71, 255);
-        tile = 16;
+        tile = 10;
         
         title_height = SCREEN_HEIGH / 6;
 
         for (y = 0; y < SCREEN_HEIGH; y += tile) {
             for (x = 0; x < SCREEN_WIDTH; x += tile) {
                 if (y < title_height) {
-                    if ((x+y) % 16 < 8) {
-                        r = rand() % 2;
-                        if (r == 0)
-                            MLV_draw_filled_rectangle(x, y, tile, tile, title1);
-                        else if (r == 1)
-                            MLV_draw_filled_rectangle(x, y, tile, tile, title2);
-                    }
+                    MLV_draw_filled_rectangle(x, y, tile, tile, noise_color(x, y, 0, 0.5f, 1.f, time, 180.f, 255.f));
                 }else {
-                    r = rand() % 6;
-                    if (r == 0)
-                        MLV_draw_filled_rectangle(x, y, tile, tile, color1);
-                    else if (r == 1)
-                        MLV_draw_filled_rectangle(x, y, tile, tile, color2);
-                    else if (r == 2)
-                        MLV_draw_filled_rectangle(x, y, tile, tile, color3);
-                    else
-                        MLV_draw_filled_rectangle(x, y, tile, tile, color4);
+                    MLV_draw_filled_rectangle(x, y, tile, tile, noise_color(x, y, 0, 1.f, 0, time, 185.f, 255.f));
                 }
             }
         }
@@ -122,7 +133,8 @@ void show_menu_screen() {
             }
         }
 
-        MLV_wait_milliseconds(100);
+        MLV_wait_milliseconds(180);
+        time += 100;
     }
     MLV_free_button(&load_btn);
     MLV_free_button(&start_signle_btn);
