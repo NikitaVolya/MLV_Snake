@@ -45,6 +45,8 @@ typedef struct {
     int force_exit;            /**< Flag to force exit the game loop */
 
     unsigned int score;
+
+    unsigned long time;
 } GameConfig;
 
 /**

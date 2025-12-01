@@ -210,10 +210,13 @@ void game_cycle(GameConfig *config) {
     next_move = 0;
 
     load_score(score_list);
+    config->time = 0;
     
     while (!config->force_exit) {
 
         clock_gettime(CLOCK_REALTIME, &start_time);
+
+        printf("%ld\n", config->time);
         
         game_input(config);
 
@@ -226,14 +229,17 @@ void game_cycle(GameConfig *config) {
         draw_game(config, score_list, (float) next_move / config->move_timer);
 
         clock_gettime(CLOCK_REALTIME, &end_time);
-
+        
         delta_time = (end_time.tv_sec - start_time.tv_sec) * SEC_IN_NSEC + (end_time.tv_nsec - start_time.tv_nsec);
 
         if (delta_time <= DRAW_TIME) {
             MLV_wait_milliseconds((DRAW_TIME - delta_time) / MSEC_IN_NSEC);
+            
             next_move += DRAW_TIME;
+            config->time += DRAW_TIME * 1000 / SEC_IN_NSEC;
         } else {
             next_move += delta_time;
+            config->time += delta_time * 1000 / SEC_IN_NSEC;
         }
 
         if (!config->first_player.is_alive && 

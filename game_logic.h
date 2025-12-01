@@ -15,12 +15,12 @@
 #include"game_screen.h"
 #include"game_menu.h"
 
-#define FRAMERATE 120                           /**< Target frames per second */
+#define FRAMERATE 120L                          /**< Target frames per second */
 
 #define MSEC_IN_NSEC 1000000UL                  /**< Conversion: milliseconds to nanoseconds */
 #define SEC_IN_NSEC ( 1000LU * MSEC_IN_NSEC )   /**< Conversion: seconds to nanoseconds */
-#define DRAW_TIME ( SEC_IN_NSEC / FRAMERATE )   /**< Nanoseconds per frame */
-#define MOVE_TIME ( 230UL * MSEC_IN_NSEC )      /**< Snake movement interval in nanoseconds */
+#define DRAW_TIME ( 1000LU / FRAMERATE )        /**< Nanoseconds per frame */
+#define MOVE_TIME ( 230LU * MSEC_IN_NSEC )      /**< Snake movement interval in nanoseconds */
 
 #define SPEED_UP 498 / 500                      /**< Speed multiplier when apple is eaten */
 
