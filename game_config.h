@@ -34,7 +34,9 @@ typedef enum {
  * @brief Stores all configuration and current state of the game.
  */
 typedef struct {
+    MLV_Image *apple_sprite;
     vector2i apple;            /**< Position of the apple on the grid */
+    
     unsigned long move_timer;  /**< Timer interval for snake movement */
     unsigned long next_move;   /**< Countdown until the next movement update */
     Snake first_player;        /**< First player's snake */
@@ -63,6 +65,8 @@ void init_game(GameConfig *game_config, GAME_MODE game_mode);
  * It works for both single-player and two-player modes.
  */
 void place_apple(GameConfig *game_config);
+
+void free_game_config(GameConfig *game_config);
 
 
 #endif /* _GAME_CONFIG_H */

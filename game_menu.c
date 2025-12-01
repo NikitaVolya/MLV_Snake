@@ -43,10 +43,13 @@ void show_menu_screen() {
     MLV_Button start_signle_btn, start_two_player_btn, exit_btn, load_btn;
     MLV_Button_state mouse_state;
     int button_width, menu_dialog;
+    
     GameConfig config;
+    
     MLV_Color menu_button_color;
     MLV_Color menu_text_color;
     MLV_Color menu_highlight_color;
+    
     unsigned long time;
     int tile;
     int title_height;
@@ -111,20 +114,22 @@ void show_menu_screen() {
                 init_game(&config, GAME_SINGLE_PLAYER_MODE);
                 config.move_timer = MOVE_TIME;
                 game_cycle(&config);
-                free_snake(&config.first_player);
+
+                free_game_config(&config);
             }
 
             if (MLV_mouse_is_on_button(&start_two_player_btn, &mouse_p)) {
                 init_game(&config, GAME_TWO_PLAYER_MODE);
                 config.move_timer = MOVE_TIME;
                 game_cycle(&config);
-                free_snake(&config.first_player);
-                free_snake(&config.second_player);
+
+                free_game_config(&config);
             }
 
             if (MLV_mouse_is_on_button(&load_btn, &mouse_p)) {
                 if (deserialize_game("save.bin", &config)){
                     game_cycle(&config);
+                    free_game_config(&config);
                 }
             }
 

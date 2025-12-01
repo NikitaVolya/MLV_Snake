@@ -79,6 +79,9 @@ int deserialize_game(const char *file_name, GameConfig *config) {
 
                 load_snake_sprite(&config->second_player, config->second_player.sprite_index);
             }
+
+            config->apple_sprite = MLV_load_image("ressources/apple.png");
+            MLV_resize_image(config->apple_sprite, GRID_CELL_DRAW_SIZE, GRID_CELL_DRAW_SIZE);
         } else {
             res = 0;
         }

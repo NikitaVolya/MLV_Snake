@@ -235,13 +235,18 @@ void draw_game(GameConfig *config, unsigned int *score_list, float shift) {
 
     MLV_clear_window(MLV_COLOR_WHITE);
 
-    MLV_draw_filled_rectangle(
+    if (config->apple_sprite == NULL)
+        MLV_draw_filled_rectangle(
                 SCREEN_X_PADDING + GRID_CELL_DRAW_SIZE * config->apple.x,
                 SCREEN_Y_PADDING + GRID_CELL_DRAW_SIZE * config->apple.y,
                 GRID_CELL_DRAW_SIZE,
                 GRID_CELL_DRAW_SIZE,
                 MLV_COLOR_RED
                 );
+    else
+        MLV_draw_image(config->apple_sprite,
+                       SCREEN_X_PADDING + GRID_CELL_DRAW_SIZE * config->apple.x,
+                       SCREEN_Y_PADDING + GRID_CELL_DRAW_SIZE * config->apple.y);
 
     draw_snake_body(&config->first_player, shift);
     draw_snake_head(&config->first_player, shift);
@@ -252,8 +257,6 @@ void draw_game(GameConfig *config, unsigned int *score_list, float shift) {
     }
 
     /* draw_grid(); */
-
-
     MLV_draw_filled_rectangle(0, 0, SCREEN_WIDTH, SCREEN_Y_PADDING, MLV_COLOR_WHITE);
     MLV_draw_filled_rectangle(0, SCREEN_Y_PADDING + GRID_SIZE * GRID_CELL_DRAW_SIZE, 
                               SCREEN_WIDTH, SCREEN_Y_PADDING, 
