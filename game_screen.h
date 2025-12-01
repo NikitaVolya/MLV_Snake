@@ -9,6 +9,7 @@
 
 #include <MLV/MLV_all.h>
 #include <string.h>
+#include <math.h>
 #include "game_config.h"
 
 /**
