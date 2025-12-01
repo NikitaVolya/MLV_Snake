@@ -115,15 +115,24 @@ void update_score_list(unsigned int new_score) {
 }
 
 int check_apple_eat(GameConfig *config, Snake *snake) {
+    GameObject *object;
     vector2i *head_p;
-    int res;
+    int res, i;
+
+    res = 0;
 
     head_p = get_snake_head_position(snake);
 
-    res = head_p->x == config->apple.x && head_p->y == config->apple.y;
+    for (i = 0; i < GAME_OBJECTS_NUMBER && res == 0; i++) {
+        object = &config->objects[i];
 
+        if (object->type == GAME_OBJECT_APPLE) {
+            res = head_p->x == object->pos.x && head_p->y == object->pos.y;
+        }
+    }
+    
     if (res) {
-        place_apple(config);
+        place_game_object(config, object);
         config->score += 10;
 
         config->move_timer = config->move_timer * SPEED_UP;
@@ -215,8 +224,6 @@ void game_cycle(GameConfig *config) {
     while (!config->force_exit) {
 
         clock_gettime(CLOCK_REALTIME, &start_time);
-
-        printf("%ld\n", config->time);
         
         game_input(config);
 

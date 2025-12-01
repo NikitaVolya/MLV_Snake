@@ -80,7 +80,7 @@ int deserialize_game(const char *file_name, GameConfig *config) {
                 load_snake_sprite(&config->second_player, config->second_player.sprite_index);
             }
 
-            load_apple_sprite(config);
+            load_objects_sprites(config);
         } else {
             res = 0;
         }

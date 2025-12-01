@@ -11,9 +11,11 @@
 #define _GAME_CONFIG_H
 
 #define GAME_SCORE_LIST_SIZE 10
+#define GAME_OBJECTS_NUMBER 2
 
 #include"snake.h"
 #include"vector2i.h"
+#include"game_object.h"
 #include"game_setup.h"
 
 #if (GRID_SIZE * GRID_SIZE) > MAX_SNAKE_SIZE
@@ -34,8 +36,7 @@ typedef enum {
  * @brief Stores all configuration and current state of the game.
  */
 typedef struct {
-    MLV_Image *apple_sprite;
-    vector2i apple;            /**< Position of the apple on the grid */
+    GameObject objects[GAME_OBJECTS_NUMBER];
     
     unsigned long move_timer;  /**< Timer interval for snake movement */
     unsigned long next_move;   /**< Countdown until the next movement update */
@@ -57,18 +58,11 @@ typedef struct {
  */
 void init_game(GameConfig *game_config, GAME_MODE game_mode);
 
-/**
- * @brief Places the apple at a random position not occupied by snakes.
- *
- * @param[out] game_config Pointer to the GameConfig structure.
- *
- * @details
- * This function ensures the apple is not placed on any segment of the snakes.
- * It works for both single-player and two-player modes.
- */
-void place_apple(GameConfig *game_config);
+void place_game_object(GameConfig *game_config, GameObject *object);
+    
+void load_objects_sprites(GameConfig *game_config);
 
-void load_apple_sprite(GameConfig *game_config);
+void free_game_objects(GameConfig *game_config);
 
 void free_game_config(GameConfig *game_config);
 

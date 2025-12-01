@@ -231,18 +231,35 @@ void draw_snake_head(Snake *snake, float shift) {
     }
 }
 
-void draw_apple(GameConfig *config) {
+void draw_apple(GameConfig *config, GameObject *object) {
     int x, y;
 
-    x = SCREEN_X_PADDING + GRID_CELL_DRAW_SIZE * config->apple.x;
-    y = SCREEN_Y_PADDING + GRID_CELL_DRAW_SIZE * config->apple.y;
+    x = SCREEN_X_PADDING + GRID_CELL_DRAW_SIZE * object->pos.x;
+    y = SCREEN_Y_PADDING + GRID_CELL_DRAW_SIZE * object->pos.y;
 
-    if (config->apple_sprite == NULL) {
+    if (object->sprite == NULL) {
         MLV_draw_filled_rectangle(x, y, GRID_CELL_DRAW_SIZE, GRID_CELL_DRAW_SIZE, MLV_COLOR_RED);
     } else {
         
         y += sinf(config->time / 120.f) * GRID_CELL_DRAW_SIZE / 10.f;
-        MLV_draw_image(config->apple_sprite, x, y);
+        MLV_draw_image(object->sprite, x, y);
+    }
+}
+
+void draw_game_objects(GameConfig *config) {
+    GameObject* object;
+    int i;
+
+    for (i = 0; i < GAME_OBJECTS_NUMBER; i++) {
+        object = &config->objects[i];
+
+        switch (object->type) {
+        case GAME_OBJECT_APPLE:
+            draw_apple(config, object);
+            break;
+        default:
+            break;
+        }
     }
 }
 
@@ -250,7 +267,7 @@ void draw_game(GameConfig *config, unsigned int *score_list, float shift) {
 
     MLV_clear_window(MLV_COLOR_WHITE);
 
-    draw_apple(config);
+    draw_game_objects(config);
 
     draw_snake_body(&config->first_player, shift);
     draw_snake_head(&config->first_player, shift);
