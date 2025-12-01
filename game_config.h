@@ -66,6 +66,8 @@ void init_game(GameConfig *game_config, GAME_MODE game_mode);
  */
 void place_apple(GameConfig *game_config);
 
+void load_apple_sprite(GameConfig *game_config);
+
 void free_game_config(GameConfig *game_config);
 
 

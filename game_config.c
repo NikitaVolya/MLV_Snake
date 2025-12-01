@@ -22,9 +22,7 @@ void init_game(GameConfig *game_config, GAME_MODE game_mode) {
         set_snake_color(&game_config->second_player, MLV_COLOR_BLUE);
     }
 
-    game_config->apple_sprite = MLV_load_image("ressources/apple.png");
-    MLV_resize_image(game_config->apple_sprite, GRID_CELL_DRAW_SIZE, GRID_CELL_DRAW_SIZE);
-    
+    load_apple_sprite(game_config);
     place_apple(game_config);
 }
 
@@ -61,6 +59,21 @@ void place_apple(GameConfig *game_config) {
 
     game_config->apple = random_p;
 }
+
+void load_apple_sprite(GameConfig *game_config) {
+    FILE *file;
+
+    file = fopen("ressources/apple.png", "r");
+    if (file == NULL) {
+        game_config->apple_sprite = NULL;
+    } else {
+        fclose(file);
+
+        game_config->apple_sprite = MLV_load_image("ressources/apple.png");
+        MLV_resize_image(game_config->apple_sprite, GRID_CELL_DRAW_SIZE, GRID_CELL_DRAW_SIZE);
+    }
+}
+
 
 void free_game_config(GameConfig *game_config) {
 
