@@ -141,6 +141,39 @@ int check_apple_eat(GameConfig *config, Snake *snake) {
     return res;
 }
 
+GameObject* check_portal_colision(Snake *snake, GameConfig *config) {
+    GameObject *main_portal, *end_portal;
+    vector2i *head_p;
+    int res, i;
+
+    res = 0;
+
+    head_p = get_snake_head_position(snake);
+
+    for (i = 0; i < GAME_OBJECTS_NUMBER && res == 0; i++) {
+        main_portal = &config->objects[i];
+
+        if (main_portal->type == GAME_OBJECT_PORTAL) {
+            res = head_p->x == main_portal->pos.x &&
+                  head_p->y == main_portal->pos.y;
+        }
+    }
+
+    
+    end_portal = NULL;
+    if (res) {
+
+        for (i = 0; i < GAME_OBJECTS_NUMBER && end_portal == NULL; i++) {
+            if (config->objects + i != main_portal &&
+                config->objects[i].type == GAME_OBJECT_PORTAL) {
+                end_portal = &config->objects[i];
+            }
+        }
+    }
+
+    return end_portal;
+}
+
 void check_self_snake_colision(Snake *snake) {
     vector2i *head_p, *tmp_p; 
     size_t i;
@@ -172,13 +205,21 @@ void check_snake_colision(Snake *first, Snake *second) {
 
 void update_snake(GameConfig *config, Snake *snake, Snake *others, int count) {
     int i;
+    GameObject *portal_move;
     
     if (snake->is_alive) {
+        
+        portal_move = check_portal_colision(snake, config);
+        if (portal_move != NULL) {
+            *get_snake_head_position(snake) = portal_move->pos;
+        }
 
         if (check_apple_eat(config, snake))
             move_and_expand_snake(snake);
         else
             move_snake(snake);
+
+        
 
         check_outofbounds(snake);
         check_self_snake_colision(snake);
