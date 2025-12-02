@@ -13,6 +13,11 @@ void init_game(GameConfig *game_config, GAME_MODE game_mode) {
     move_and_expand_snake(&game_config->first_player);
 
     
+    game_config->objects[0].type = GAME_OBJECT_APPLE;
+    game_config->objects[1].type = GAME_OBJECT_NONE;
+    game_config->objects[2].type = GAME_OBJECT_PORTAL;
+    game_config->objects[3].type = GAME_OBJECT_PORTAL;
+    
     if (game_mode == GAME_TWO_PLAYER_MODE) {
         game_config->second_player = create_snake();
         load_snake_sprite(&game_config->second_player, 8);
@@ -23,14 +28,16 @@ void init_game(GameConfig *game_config, GAME_MODE game_mode) {
 
         
         game_config->objects[1].type = GAME_OBJECT_APPLE;
+        place_game_object(game_config, &game_config->objects[1]);
     }
 
-    game_config->objects[0].type = GAME_OBJECT_APPLE;
     
     load_objects_sprites(game_config);
     
     place_game_object(game_config, &game_config->objects[0]);
-    place_game_object(game_config, &game_config->objects[1]);
+    place_game_object(game_config, &game_config->objects[2]);
+
+    place_game_object(game_config, &game_config->objects[3]);
 }
 
 void place_game_object(GameConfig *game_config, GameObject *object) {
@@ -104,6 +111,10 @@ void load_objects_sprites(GameConfig *game_config) {
         case GAME_OBJECT_APPLE:
             object->sprite = save_sprite_load("ressources/apple.png");
             object->color = MLV_rgba(255, 0, 0, 255);
+            break;
+        case GAME_OBJECT_PORTAL:
+            object->sprite = NULL;
+            object->color = MLV_rgba(0, 0, 255, 255);
             break;
         default:
             object->sprite = NULL;

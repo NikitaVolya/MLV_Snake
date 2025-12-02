@@ -238,10 +238,23 @@ void draw_apple(GameConfig *config, GameObject *object) {
     y = SCREEN_Y_PADDING + GRID_CELL_DRAW_SIZE * object->pos.y;
 
     if (object->sprite == NULL) {
-        MLV_draw_filled_rectangle(x, y, GRID_CELL_DRAW_SIZE, GRID_CELL_DRAW_SIZE, MLV_COLOR_RED);
+        MLV_draw_filled_rectangle(x, y, GRID_CELL_DRAW_SIZE, GRID_CELL_DRAW_SIZE, object->color);
     } else {
         
-        y += sinf(config->time / 120.f) * GRID_CELL_DRAW_SIZE / 10.f;
+        y += sinf(config->time / 60.f) * GRID_CELL_DRAW_SIZE / 10.f;
+        MLV_draw_image(object->sprite, x, y);
+    }
+}
+
+void draw_portal(GameObject *object) {
+    int x, y;
+
+    x = SCREEN_X_PADDING + GRID_CELL_DRAW_SIZE * object->pos.x;
+    y = SCREEN_Y_PADDING + GRID_CELL_DRAW_SIZE * object->pos.y;
+
+    if (object->sprite == NULL) {
+        MLV_draw_filled_rectangle(x, y, GRID_CELL_DRAW_SIZE, GRID_CELL_DRAW_SIZE, object->color);
+    } else {
         MLV_draw_image(object->sprite, x, y);
     }
 }
@@ -256,6 +269,9 @@ void draw_game_objects(GameConfig *config) {
         switch (object->type) {
         case GAME_OBJECT_APPLE:
             draw_apple(config, object);
+            break;
+        case GAME_OBJECT_PORTAL:
+            draw_portal(object);
             break;
         default:
             break;
