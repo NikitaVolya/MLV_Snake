@@ -13,4 +13,5 @@ typedef struct {
     GAME_OBJECT_TYPE type;
     vector2i pos;
     MLV_Image *sprite;
+    MLV_Color color;
 } GameObject;
