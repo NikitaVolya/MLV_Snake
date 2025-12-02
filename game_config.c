@@ -28,6 +28,7 @@ void init_game(GameConfig *game_config, GAME_MODE game_mode) {
     game_config->objects[0].type = GAME_OBJECT_APPLE;
     
     load_objects_sprites(game_config);
+    
     place_game_object(game_config, &game_config->objects[0]);
     place_game_object(game_config, &game_config->objects[1]);
 }
@@ -102,11 +103,11 @@ void load_objects_sprites(GameConfig *game_config) {
         switch (object->type) {
         case GAME_OBJECT_APPLE:
             object->sprite = save_sprite_load("ressources/apple.png");
-            break;
-        case GAME_OBJECT_NONE:
-            object->sprite = NULL;
+            object->color = MLV_rgba(255, 0, 0, 255);
             break;
         default:
+            object->sprite = NULL;
+            object->color = MLV_rgba(0, 0, 0, 255);
             break;
         }
     }
