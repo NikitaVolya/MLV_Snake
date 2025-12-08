@@ -158,7 +158,6 @@ GameObject* check_portal_colision(Snake *snake, GameConfig *config) {
                   head_p->y == main_portal->pos.y;
         }
     }
-
     
     end_portal = NULL;
     if (res) {
@@ -167,6 +166,10 @@ GameObject* check_portal_colision(Snake *snake, GameConfig *config) {
             if (config->objects + i != main_portal &&
                 config->objects[i].type == GAME_OBJECT_PORTAL) {
                 end_portal = &config->objects[i];
+
+                if (find_snake_part_by_position(snake, end_portal->pos) != -1) {
+                    end_portal = NULL;
+                }
             }
         }
     }
@@ -208,17 +211,17 @@ void update_snake(GameConfig *config, Snake *snake, Snake *others, int count) {
     GameObject *portal_move;
     
     if (snake->is_alive) {
-        
         portal_move = check_portal_colision(snake, config);
-        if (portal_move != NULL) {
-            *get_snake_head_position(snake) = portal_move->pos;
-        }
 
         if (check_apple_eat(config, snake))
             move_and_expand_snake(snake);
         else
             move_snake(snake);
 
+        if (portal_move != NULL) {
+            *get_snake_head_position(snake) = portal_move->pos;
+            move_snake(snake);
+        }
         
 
         check_outofbounds(snake);
