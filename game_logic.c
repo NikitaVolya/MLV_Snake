@@ -148,7 +148,7 @@ int check_apple_eat(GameConfig *config, Snake *snake) {
 GameObject* check_portal_colision(Snake *snake, GameConfig *config) {
     GameObject *main_portal, *end_portal;
     vector2i *head_p;
-    int res, i;
+    int res, i, random_p;
 
     res = 0;
 
@@ -166,13 +166,24 @@ GameObject* check_portal_colision(Snake *snake, GameConfig *config) {
     end_portal = NULL;
     if (res) {
 
-        for (i = 0; i < GAME_OBJECTS_NUMBER && end_portal == NULL; i++) {
-            if (config->objects + i != main_portal &&
-                config->objects[i].type == GAME_OBJECT_PORTAL) {
-                end_portal = &config->objects[i];
+        random_p = rand() % GAME_OBJECTS_NUMBER;
 
-                if (find_snake_part_by_position(snake, end_portal->pos) != -1) {
-                    end_portal = NULL;
+        while (random_p >= 0) {
+
+            for (i = 0; i < GAME_OBJECTS_NUMBER && end_portal == NULL; i++) {
+                if (config->objects + i != main_portal &&
+                    config->objects[i].type == GAME_OBJECT_PORTAL) {
+                        if (random_p > 0) {
+                            random_p--;
+                        } else {
+                            end_portal = &config->objects[i];
+
+                            if (find_snake_part_by_position(snake, end_portal->pos) != -1) {
+                                end_portal = NULL;
+                            }
+
+                            random_p = -1;
+                        }
                 }
             }
         }
@@ -238,6 +249,9 @@ void update_snake(GameConfig *config, Snake *snake, Snake *others, int count) {
         if (!snake->is_alive) {
             move_back_snake(snake);
             remove_tail_snake(snake);
+
+            if (portal_move != NULL)
+                move_back_snake(snake);
         }
     }
 }

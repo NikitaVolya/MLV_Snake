@@ -11,7 +11,7 @@
 #define _GAME_CONFIG_H
 
 #define GAME_SCORE_LIST_SIZE 10
-#define GAME_OBJECTS_NUMBER 4
+#define GAME_OBJECTS_NUMBER 5
 
 #include"snake.h"
 #include"vector2i.h"

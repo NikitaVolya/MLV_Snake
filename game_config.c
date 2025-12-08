@@ -17,6 +17,7 @@ void init_game(GameConfig *game_config, GAME_MODE game_mode) {
     game_config->objects[1].type = GAME_OBJECT_NONE;
     game_config->objects[2].type = GAME_OBJECT_PORTAL;
     game_config->objects[3].type = GAME_OBJECT_PORTAL;
+    game_config->objects[4].type = GAME_OBJECT_NONE;
     
     if (game_mode == GAME_TWO_PLAYER_MODE) {
         game_config->second_player = create_snake();
@@ -28,7 +29,10 @@ void init_game(GameConfig *game_config, GAME_MODE game_mode) {
 
         
         game_config->objects[1].type = GAME_OBJECT_APPLE;
+        game_config->objects[4].type = GAME_OBJECT_PORTAL;
+
         place_game_object(game_config, &game_config->objects[1]);
+        place_game_object(game_config, &game_config->objects[4]);
     }
 
     
