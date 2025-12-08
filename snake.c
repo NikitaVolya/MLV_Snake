@@ -114,6 +114,21 @@ vector2i* get_snake_part_position(Snake *snake, size_t index) {
     return &snake->items[real_index];
 }
 
+int find_snake_part_by_position(Snake *snake, vector2i pos) {
+    size_t i;
+    int res;
+
+    res = -1;
+    for (i = 0; i < snake->count && res == -1; i++) {
+        if (get_snake_part_position(snake, i)->x == pos.x &&
+            get_snake_part_position(snake, i)->y == pos.y) {
+                res = (int) i;
+            }
+    }
+
+    return res;
+}
+
 vector2i* get_snake_head_position(Snake *snake) {
     return &snake->items[snake->head_index];
 }

@@ -164,6 +164,16 @@ SnakeDirection get_snake_next_rotation(Snake *snake);
 vector2i* get_snake_part_position(Snake *snake, size_t index);
 
 /**
+ * @brief Founds a specific segment of the snake by position
+ *
+ * @param[in] snake Pointer.
+ * @param[in] pos Position of segment.
+ * @return index of a segment of the snake in this position
+ *         -1 otherwise.
+*/
+int find_snake_part_by_position(Snake *snake, vector2i pos);
+
+/**
  * @brief Returns the position of the snake's head.
  *
  * @param[in] snake Pointer.
