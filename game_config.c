@@ -83,6 +83,25 @@ void place_game_object(GameConfig *game_config, GameObject *object) {
     object->pos = random_p;
 }
 
+void replace_portals(GameConfig *config) {
+    GameObject *object;
+    int i, is_first_player_in_portal, is_second_player_in_portal;
+
+    for (i = 0; i < GAME_OBJECTS_NUMBER; i++) {
+        object = config->objects + i;
+
+        is_first_player_in_portal = find_snake_part_by_position(&config->first_player, object->pos) != -1;
+        is_second_player_in_portal = config->game_mode == GAME_TWO_PLAYER_MODE && 
+                                     find_snake_part_by_position(&config->second_player, object->pos) != -1;
+    
+        if (object->type == GAME_OBJECT_PORTAL && 
+            !is_first_player_in_portal && 
+            !is_second_player_in_portal)
+            place_game_object(config, object);
+    }
+
+}
+
 MLV_Image* save_sprite_load(const char *file_name) {
     FILE *file;
     MLV_Image *res;

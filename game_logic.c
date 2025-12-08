@@ -136,6 +136,10 @@ int check_apple_eat(GameConfig *config, Snake *snake) {
         config->score += 10;
 
         config->move_timer = config->move_timer * SPEED_UP;
+
+        if (rand() % 100 <= PORTAL_REPLACE_CHANCE) {
+            replace_portals(config);
+        }
     }
 
     return res;
