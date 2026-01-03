@@ -37,6 +37,115 @@ MLV_Color noise_color(float x, float y, float r, float g, float b, float time, f
     return MLV_rgba(r, g, b, 255);
 }
 
+void draw_background(unsigned long time) {
+    int tile, title_height, x, y;
+
+    tile = 10;
+
+    title_height = SCREEN_HEIGH / 6;
+
+    for (y = 0; y < SCREEN_HEIGH; y += tile) {
+        for (x = 0; x < SCREEN_WIDTH; x += tile) {
+            if (y < title_height) {
+                MLV_draw_filled_rectangle(x, y, tile, tile, noise_color(x, y, 0, 0.5f, 1.f, time, 180.f, 255.f));
+            }else {
+                MLV_draw_filled_rectangle(x, y, tile, tile, noise_color(x, y, 0, 1.f, 0, time, 185.f, 255.f));
+            }
+        }
+    }
+}
+
+void select_solo_skin_dialog(GameConfig *config) {
+    vector2i mouse_p;
+    MLV_Button_state mouse_state, old_mouse_state;
+    MLV_Button prev_btn, next_btn, close_btn;
+    MLV_Image *snake_sprite;
+    int cancel_dialog, selected_skin;
+    unsigned int time = 0;
+    char path[35];
+
+    prev_btn = MLV_create_button("<=", 
+        create_vector2i(SCREEN_WIDTH / 2 - SCREEN_WIDTH / 15, SCREEN_HEIGH / 2), 
+        create_vector2i(SCREEN_WIDTH / 15, MENU_BUTTON_HEIGHT * 1.5), 
+        MLV_COLOR_WHITE, MLV_COLOR_BLUE, MLV_COLOR_GREEN);
+
+    next_btn = MLV_create_button("=>", 
+        create_vector2i(SCREEN_WIDTH / 2, SCREEN_HEIGH  / 2), 
+        create_vector2i(SCREEN_WIDTH / 15, MENU_BUTTON_HEIGHT * 1.5), 
+        MLV_COLOR_WHITE, MLV_COLOR_BLUE, MLV_COLOR_GREEN);
+
+    close_btn = MLV_create_button("Start game", 
+        create_vector2i(SCREEN_WIDTH / 2 - SCREEN_WIDTH / 6, SCREEN_HEIGH * 3 / 4), 
+        create_vector2i(SCREEN_WIDTH / 3, MENU_BUTTON_HEIGHT * 1.5), 
+        MLV_COLOR_WHITE, MLV_COLOR_BLUE, MLV_COLOR_GREEN);
+    
+    selected_skin = 0;
+    cancel_dialog = 0;
+    old_mouse_state = MLV_PRESSED;
+
+    strcpy(path, SNAKE_SPRITE_BASE_PATH);
+    snake_sprite = MLV_load_image(path);
+
+    while (!cancel_dialog) {
+        
+        MLV_get_mouse_position(&mouse_p.x, &mouse_p.y);
+
+        draw_background(time);
+
+        if (snake_sprite != NULL)
+            MLV_draw_partial_image(snake_sprite, 32, 0, 64, 32, SCREEN_WIDTH / 2 - 32, SCREEN_HEIGH / 2 - 100);
+
+        MLV_draw_button(&prev_btn, &mouse_p);
+        MLV_draw_button(&next_btn, &mouse_p);
+        MLV_draw_button(&close_btn, &mouse_p);
+
+        MLV_actualise_window();
+
+        
+        mouse_state = MLV_get_mouse_button_state(MLV_BUTTON_LEFT);
+
+        if (mouse_state == MLV_PRESSED && old_mouse_state == MLV_RELEASED) {
+            if (MLV_mouse_is_on_button(&close_btn, &mouse_p)) {
+                cancel_dialog = 1;
+            }
+            else if (MLV_mouse_is_on_button(&prev_btn, &mouse_p)) {
+                selected_skin--;
+                if (selected_skin < 0)
+                    selected_skin = MAX_SNAKE_SPRITE_INDEX;
+
+                path[SNAKE_SPRITE_NUMBER_INDEX] = '0' + selected_skin % 10;
+                path[SNAKE_SPRITE_NUMBER_INDEX - 1] = '0' + selected_skin / 10 % 10;
+                path[SNAKE_SPRITE_NUMBER_INDEX - 2] = '0' + selected_skin / 100 % 10;
+
+                MLV_free_image(snake_sprite);
+                snake_sprite = MLV_load_image(path);
+            }
+            else if (MLV_mouse_is_on_button(&next_btn, &mouse_p)) {
+                selected_skin++;
+                if (selected_skin > MAX_SNAKE_SPRITE_INDEX)
+                    selected_skin = 0;
+
+                path[SNAKE_SPRITE_NUMBER_INDEX] = '0' + selected_skin % 10;
+                path[SNAKE_SPRITE_NUMBER_INDEX - 1] = '0' + selected_skin / 10 % 10;
+                path[SNAKE_SPRITE_NUMBER_INDEX - 2] = '0' + selected_skin / 100 % 10;
+
+                MLV_free_image(snake_sprite);
+                snake_sprite = MLV_load_image(path);
+            }
+        }
+
+        printf("%s\n", path);
+
+        MLV_wait_milliseconds(100);
+        time += 100;
+
+        old_mouse_state = mouse_state;
+    }
+
+    MLV_free_image(snake_sprite);
+    load_snake_sprite(&config->first_player, selected_skin);
+}
+
 
 void show_menu_screen() {
     vector2i mouse_p, tmp_p, btn_size;
@@ -51,10 +160,6 @@ void show_menu_screen() {
     MLV_Color menu_highlight_color;
     
     unsigned long time;
-    int tile;
-    int title_height;
-    int x, y;
-    
     
     init_game_screen();
 
@@ -83,21 +188,9 @@ void show_menu_screen() {
 
     while (menu_dialog) {
 
-        tile = 10;
-        
-        title_height = SCREEN_HEIGH / 6;
-
-        for (y = 0; y < SCREEN_HEIGH; y += tile) {
-            for (x = 0; x < SCREEN_WIDTH; x += tile) {
-                if (y < title_height) {
-                    MLV_draw_filled_rectangle(x, y, tile, tile, noise_color(x, y, 0, 0.5f, 1.f, time, 180.f, 255.f));
-                }else {
-                    MLV_draw_filled_rectangle(x, y, tile, tile, noise_color(x, y, 0, 1.f, 0, time, 185.f, 255.f));
-                }
-            }
-        }
-    
         MLV_get_mouse_position(&mouse_p.x, &mouse_p.y);
+
+        draw_background(time);
 
         MLV_draw_button(&start_signle_btn, &mouse_p);
         MLV_draw_button(&start_two_player_btn, &mouse_p);
@@ -113,6 +206,9 @@ void show_menu_screen() {
             if (MLV_mouse_is_on_button(&start_signle_btn, &mouse_p)) {
                 init_game(&config, GAME_SINGLE_PLAYER_MODE);
                 config.move_timer = MOVE_TIME;
+
+                select_solo_skin_dialog(&config);
+
                 game_cycle(&config);
 
                 free_game_config(&config);
@@ -138,7 +234,7 @@ void show_menu_screen() {
             }
         }
 
-        MLV_wait_milliseconds(180);
+        MLV_wait_milliseconds(100);
         time += 100;
     }
     MLV_free_button(&load_btn);

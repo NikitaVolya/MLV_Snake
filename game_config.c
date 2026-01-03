@@ -21,7 +21,6 @@ void init_game(GameConfig *game_config, GAME_MODE game_mode) {
     
     if (game_mode == GAME_TWO_PLAYER_MODE) {
         game_config->second_player = create_snake();
-        load_snake_sprite(&game_config->second_player, 8);
 
         get_snake_head_position(&game_config->second_player)->x = 7;
         move_and_expand_snake(&game_config->second_player);

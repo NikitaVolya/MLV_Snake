@@ -17,8 +17,7 @@
 #include"vector2i.h"
 
 #define MAX_SNAKE_SIZE 900
-#define MIN_SNAKE_SPRITE_INDEX 0
-#define MAX_SNAKE_SPRITE_INDEX 15
+#define MAX_SNAKE_SPRITE_INDEX 21
 #define SNAKE_SPRITE_BASE_PATH "ressources/snake/snake000.png"
 #define SNAKE_SPRITE_NUMBER_INDEX 24
 

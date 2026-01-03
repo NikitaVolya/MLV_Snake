@@ -9,7 +9,7 @@ void load_snake_sprite(Snake *snake, int index) {
 
     sprite = &snake->sprite;
 
-    if (index < MIN_SNAKE_SPRITE_INDEX || index > MAX_SNAKE_SPRITE_INDEX) {
+    if (index < 0 || index > MAX_SNAKE_SPRITE_INDEX) {
         fprintf(stderr, "Warining : snake sprite index %d out of bounds\nset sprite index to 0\n", index);
         index = 0;
     }
