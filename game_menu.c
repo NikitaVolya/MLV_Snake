@@ -1,34 +1,68 @@
+/**
+ * @file game_menu.c
+ * @brief Menu rendering and interactions for the Snake game.
+ *
+ * This file implements:
+ * - The main menu screen (title, animated background, buttons)
+ * - Decorative animated snakes moving in square paths (right side + under buttons)
+ * - A background button (top-right) that randomizes the noise color palette
+ * - The in-game pause menu (continue / save / load / stop)
+ */
+
 #include "game_menu.h"
+
 #include <stdlib.h>
 #include <time.h>
 
 /* =========================================================
-   Noise background (time is in seconds)
-   ========================================================= */
+ * Background noise helpers
+ * ========================================================= */
+
 static float hash(float n) {
-    return fmodf(sinf(n) * 43758.5453123f, 1.0f);
+    return (float)fmod(sin(n) * 43758.5453123, 1.0);
 }
 
 static float noise(float x, float y, float t) {
-    float fx = floorf(x), fy = floorf(y);
+    float fx;
+    float fy;
 
-    float a = hash(fx + fy * 57.0f + t * 13.0f);
-    float b = hash(fx + 1.0f + fy * 57.0f + t * 13.0f);
-    float c = hash(fx + (fy + 1.0f) * 57.0f + t * 13.0f);
-    float d = hash(fx + 1.0f + (fy + 1.0f) * 57.0f + t * 13.0f);
+    float a;
+    float b;
+    float c;
+    float d;
 
-    float u = x - fx;
-    float v = y - fy;
+    float u;
+    float v;
 
-    float lerp1 = a + u * (b - a);
-    float lerp2 = c + u * (d - c);
+    float lerp1;
+    float lerp2;
+
+    fx = (float)floor(x);
+    fy = (float)floor(y);
+
+    a = hash(fx + fy * 57.0f + t * 13.0f);
+    b = hash(fx + 1.0f + fy * 57.0f + t * 13.0f);
+    c = hash(fx + (fy + 1.0f) * 57.0f + t * 13.0f);
+    d = hash(fx + 1.0f + (fy + 1.0f) * 57.0f + t * 13.0f);
+
+    u = x - fx;
+    v = y - fy;
+
+    lerp1 = a + u * (b - a);
+    lerp2 = c + u * (d - c);
 
     return lerp1 + v * (lerp2 - lerp1);
 }
 
-static MLV_Color noise_color(float x, float y, float r, float g, float b,
-                            float time_s, float min_color, float max_color) {
-    float n = noise(x * 0.1f, y * 0.1f, time_s * 0.15f);
+static MLV_Color noise_color(
+    float x, float y,
+    float r, float g, float b,
+    float time_s,
+    float min_color, float max_color
+) {
+    float n;
+
+    n = noise(x * 0.1f, y * 0.1f, time_s * 0.15f);
 
     r *= min_color + n * (max_color - min_color);
     g *= min_color + n * (max_color - min_color);
@@ -38,8 +72,8 @@ static MLV_Color noise_color(float x, float y, float r, float g, float b,
 }
 
 /* =========================================================
-   Menu snakes: square movement + safe init (body fits in bounds)
-   ========================================================= */
+ * Decorationnnn menu snakes (square movement)
+ * ========================================================= */
 
 static void init_snake_in_square_bounds(Snake* s, int x_min, int y_min, int x_max, int length) {
     int k;
@@ -47,13 +81,21 @@ static void init_snake_in_square_bounds(Snake* s, int x_min, int y_min, int x_ma
     vector2i p;
 
     max_len = (x_max - x_min + 1);
-    if (max_len < 1) max_len = 1;
+    if (max_len < 1) {
+        max_len = 1;
+    }
 
-    if (length < 1) length = 1;
-    if (length > max_len) length = max_len;
-    if (length > (int)MAX_SNAKE_SIZE) length = (int)MAX_SNAKE_SIZE;
+    if (length < 1) {
+        length = 1;
+    }
+    if (length > max_len) {
+        length = max_len;
+    }
+    if (length > (int)MAX_SNAKE_SIZE) {
+        length = (int)MAX_SNAKE_SIZE;
+    }
 
-    /* Place head so body fits entirely inside (body extends left) */
+    /* Head so that the body (extending left) stays inside the square */
     s->items[0] = create_vector2i(x_min + (length - 1), y_min);
     s->head_index = 0;
     s->count = (size_t)length;
@@ -71,7 +113,9 @@ static void init_snake_in_square_bounds(Snake* s, int x_min, int y_min, int x_ma
 }
 
 static void update_snake_square_turn(Snake* s, int x_min, int y_min, int x_max, int y_max) {
-    vector2i* head = get_snake_part_position(s, 0);
+    vector2i* head;
+
+    head = get_snake_part_position(s, 0);
 
     if (s->direction == SNAKE_DIRECTION_RIGTH && head->x >= x_max) {
         set_snake_direction(s, SNAKE_DIRECTION_BOTTOM);
@@ -87,68 +131,99 @@ static void update_snake_square_turn(Snake* s, int x_min, int y_min, int x_max, 
     }
 }
 
-/* Pick a new palette index different from current */
+/* =========================================================
+ * Background palette switching
+ * ========================================================= */
+
 static int pick_new_palette(int current, int palette_count) {
     int r;
-    if (palette_count <= 1) return 0;
+
+    if (palette_count <= 1) {
+        return 0;
+    }
+
     r = rand() % palette_count;
-    if (r == current) r = (r + 1) % palette_count;
+    if (r == current) {
+        r = (r + 1) % palette_count;
+    }
+
     return r;
 }
 
-/* =========================
-   MAIN MENU SCREEN
-   - Buttons on LEFT
-   - Title "SNAKE GAME"
-   - 5 snakes nested squares on RIGHT (pushed a bit further right)
-   - 2 snakes squares on LEFT centered under the buttons (no overlap)
-   - BG button top-right randomizes noise palettes
-   ========================= */
+/* =========================================================
+ * Main menu screen
+ * ========================================================= */
+
 void show_menu_screen() {
-    vector2i mouse_p, tmp_p, btn_size;
-    MLV_Button start_signle_btn, start_two_player_btn, exit_btn, load_btn;
+    /* ---- UI / input ---- */
+    vector2i mouse_p;
+    vector2i tmp_p;
+    vector2i btn_size;
+
+    MLV_Button start_signle_btn;
+    MLV_Button start_two_player_btn;
+    MLV_Button exit_btn;
+    MLV_Button load_btn;
     MLV_Button bg_btn;
-    MLV_Button_state mouse_state, prev_mouse_state;
+
+    MLV_Button_state mouse_state;
+    MLV_Button_state prev_mouse_state;
 
     int button_width;
     int menu_dialog;
-    int x, y;
 
+    /* ---- drawing / timing ---- */
+    int x;
+    int y;
+    int tile;
+    int title_height;
+
+    float time_s;
+
+    struct timespec start_time;
+    struct timespec end_time;
+    unsigned long delta_time;
+    unsigned long next_move;
+
+    /* ---- game config ---- */
     GameConfig config;
 
+    /* ---- colors ---- */
     MLV_Color menu_button_color;
     MLV_Color menu_text_color;
     MLV_Color menu_highlight_color;
 
-    float time_s;
-    int tile;
-    int title_height;
-
-    struct timespec start_time, end_time;
-    unsigned long delta_time;
-    unsigned long next_move;
-
     int left_margin;
 
-    /* ===== Snake skins (presets) ===== */
+    /* ---- snakes ---- */
     const int preset_right[5] = { 15, 14, 13, 12, 11 };
     const int preset_left[2]  = { 10,  9 };
 
-    /* Snake lengths (auto-clamped to each square width) */
     const int snake_length_right = 6;
     const int snake_length_left  = 5;
 
-    /* Total snakes: 5 (right) + 2 (left) */
     Snake snakes_right[5];
     Snake snakes_left[2];
 
-    int rx_min[5], ry_min[5], rx_max[5], ry_max[5];
-    int lx_min[2], ly_min[2], lx_max[2], ly_max[2];
+    int rx_min[5];
+    int ry_min[5];
+    int rx_max[5];
+    int ry_max[5];
 
-    int outer_x_min, outer_x_max, outer_y_min, outer_y_max;
-    int i, inset;
+    int lx_min[2];
+    int ly_min[2];
+    int lx_max[2];
+    int ly_max[2];
 
-    /* ---- Noise palettes (top area and main area) ---- */
+    int outer_x_min;
+    int outer_x_max;
+    int outer_y_min;
+    int outer_y_max;
+
+    int i;
+    int inset;
+
+    /* ---- palettes ---- */
     struct Palette {
         float top_r, top_g, top_b;
         float bot_r, bot_g, bot_b;
@@ -164,30 +239,41 @@ void show_menu_screen() {
         /* yellow + orange */
         { 1.00f, 0.95f, 0.20f,   1.00f, 0.55f, 0.10f }
     };
+
     const int palette_count = (int)(sizeof(palettes) / sizeof(palettes[0]));
-    int palette_i = 0;
+    int palette_i;
 
-    /* Create window FIRST (must be done before any sprite loads) */
     init_game_screen();
-    srand((unsigned int)time(NULL));
 
-    /* ----- Right side: outer square on the RIGHT, sized to fit 5 nested squares ----- */
-    /* To push it a bit more right, we allow a smaller inner square size (3 instead of 4) */
+    srand((unsigned int)time(NULL));
+    palette_i = 0;
+
+    /* -------------------------------------------------
+     * RIGHT PACK: 5 nested snake squares, pushed slightly right
+     * (smaller minimal inner square => pack shifts right)
+     * ------------------------------------------------- */
     {
-        int min_inner = 3;                 /* smaller inner => whole pack shifts right */
-        int need = min_inner + 2 * (5 - 1);/* min_inner + 8 */
+        int min_inner;
+        int need;
+
+        min_inner = 3;                      /* keeps the pack a bit more right */
+        need = min_inner + 2 * (5 - 1);     /* min_inner + 8 */
 
         outer_x_max = GRID_SIZE - 2;
         outer_y_min = 2;
         outer_y_max = GRID_SIZE - 3;
 
         outer_x_min = outer_x_max - need;
-        if (outer_x_min < 1) outer_x_min = 1;
+        if (outer_x_min < 1) {
+            outer_x_min = 1;
+        }
 
         if ((outer_y_max - outer_y_min) < need) {
             outer_y_min = 1;
             outer_y_max = outer_y_min + need;
-            if (outer_y_max > GRID_SIZE - 2) outer_y_max = GRID_SIZE - 2;
+            if (outer_y_max > GRID_SIZE - 2) {
+                outer_y_max = GRID_SIZE - 2;
+            }
         }
     }
 
@@ -204,10 +290,11 @@ void show_menu_screen() {
         init_snake_in_square_bounds(&snakes_right[i], rx_min[i], ry_min[i], rx_max[i], snake_length_right);
     }
 
-    /* ----- Left side: 2 squares centered under the buttons ----- */
-    /* These x-ranges are intentionally kept away from the right pack to avoid overlap. */
-    lx_min[0] = 1;  lx_max[0] = 6;  ly_min[0] = 7;  ly_max[0] = 14; /* outer under-buttons square */
-    lx_min[1] = 2;  lx_max[1] = 5;  ly_min[1] = 8;  ly_max[1] = 13; /* inner under-buttons square */
+    /* -------------------------------------------------
+     * LEFT PACK: 2 snakes under the buttons
+     * ------------------------------------------------- */
+    lx_min[0] = 1;  lx_max[0] = 6;  ly_min[0] = 7;  ly_max[0] = 14;
+    lx_min[1] = 2;  lx_max[1] = 5;  ly_min[1] = 8;  ly_max[1] = 13;
 
     for (i = 0; i < 2; i++) {
         snakes_left[i] = create_snake();
@@ -215,7 +302,9 @@ void show_menu_screen() {
         init_snake_in_square_bounds(&snakes_left[i], lx_min[i], ly_min[i], lx_max[i], snake_length_left);
     }
 
-    /* Buttons on LEFT */
+    /* -------------------------------------------------
+     * Buttons
+     * ------------------------------------------------- */
     button_width = SCREEN_WIDTH / 3;
     left_margin = SCREEN_WIDTH / 20;
 
@@ -249,11 +338,14 @@ void show_menu_screen() {
         menu_button_color, menu_text_color, menu_highlight_color
     );
 
-    /* BG button top-right */
     {
-        vector2i pos, size;
-        int bw = 90;
-        int bh = 38;
+        vector2i pos;
+        vector2i size;
+        int bw;
+        int bh;
+
+        bw = 90;
+        bh = 38;
 
         pos = create_vector2i(SCREEN_WIDTH - left_margin - bw, left_margin);
         size = create_vector2i(bw, bh);
@@ -264,6 +356,9 @@ void show_menu_screen() {
         );
     }
 
+    /* -------------------------------------------------
+     * Loop state
+     * ------------------------------------------------- */
     menu_dialog = 1;
     time_s = 0.0f;
     next_move = 0;
@@ -282,20 +377,24 @@ void show_menu_screen() {
                 if (y < title_height) {
                     MLV_draw_filled_rectangle(
                         x, y, tile, tile,
-                        noise_color(x, y,
-                                    palettes[palette_i].top_r,
-                                    palettes[palette_i].top_g,
-                                    palettes[palette_i].top_b,
-                                    time_s, 180.f, 255.f)
+                        noise_color(
+                            (float)x, (float)y,
+                            palettes[palette_i].top_r,
+                            palettes[palette_i].top_g,
+                            palettes[palette_i].top_b,
+                            time_s, 180.f, 255.f
+                        )
                     );
                 } else {
                     MLV_draw_filled_rectangle(
                         x, y, tile, tile,
-                        noise_color(x, y,
-                                    palettes[palette_i].bot_r,
-                                    palettes[palette_i].bot_g,
-                                    palettes[palette_i].bot_b,
-                                    time_s, 185.f, 255.f)
+                        noise_color(
+                            (float)x, (float)y,
+                            palettes[palette_i].bot_r,
+                            palettes[palette_i].bot_g,
+                            palettes[palette_i].bot_b,
+                            time_s, 185.f, 255.f
+                        )
                     );
                 }
             }
@@ -303,9 +402,13 @@ void show_menu_screen() {
 
         /* Title */
         {
-            const char *title = "SNAKE GAME";
-            int tw, th;
-            int tx, ty;
+            const char *title;
+            int tw;
+            int th;
+            int tx;
+            int ty;
+
+            title = "SNAKE GAME";
 
             MLV_get_size_of_text(title, &tw, &th);
             tx = (SCREEN_WIDTH - tw) / 2;
@@ -318,7 +421,7 @@ void show_menu_screen() {
             MLV_draw_text(tx, ty, title, MLV_COLOR_WHITE);
         }
 
-        /* Draw snakes FIRST so they appear under buttons */
+        /* Draw snakes first so they appear under the buttons */
         for (i = 0; i < 5; i++) {
             draw_snake_body(&snakes_right[i], (float)next_move / MOVE_TIME);
             draw_snake_head(&snakes_right[i], (float)next_move / MOVE_TIME);
@@ -342,7 +445,7 @@ void show_menu_screen() {
 
         mouse_state = MLV_get_mouse_button_state(MLV_BUTTON_LEFT);
 
-        /* Debounced click */
+        /* Debounced click: trigger only on RELEASED -> PRESSED */
         if (mouse_state == MLV_PRESSED && prev_mouse_state == MLV_RELEASED) {
 
             if (MLV_mouse_is_on_button(&bg_btn, &mouse_p)) {
@@ -393,7 +496,7 @@ void show_menu_screen() {
         /* Frame pacing */
         clock_gettime(CLOCK_REALTIME, &end_time);
         delta_time = (end_time.tv_sec - start_time.tv_sec) * SEC_IN_NSEC +
-                     (end_time.tv_nsec - start_time.tv_nsec);
+                     (unsigned long)(end_time.tv_nsec - start_time.tv_nsec);
 
         if (delta_time <= DRAW_TIME) {
             MLV_wait_milliseconds((DRAW_TIME - delta_time) / MSEC_IN_NSEC);
@@ -406,8 +509,12 @@ void show_menu_screen() {
     }
 
     /* Cleanup snakes */
-    for (i = 0; i < 5; i++) free_snake(&snakes_right[i]);
-    for (i = 0; i < 2; i++) free_snake(&snakes_left[i]);
+    for (i = 0; i < 5; i++) {
+        free_snake(&snakes_right[i]);
+    }
+    for (i = 0; i < 2; i++) {
+        free_snake(&snakes_left[i]);
+    }
 
     /* Cleanup buttons + window */
     MLV_free_button(&bg_btn);
@@ -415,15 +522,24 @@ void show_menu_screen() {
     MLV_free_button(&start_signle_btn);
     MLV_free_button(&start_two_player_btn);
     MLV_free_button(&exit_btn);
+
     free_game_screen();
 }
 
-/* =========================
-   PAUSE MENU (unchanged)
-   ========================= */
+/* =========================================================
+ * In-game pause menu
+ * ========================================================= */
+
 void show_menu(GameConfig *config) {
-    vector2i mouse_p, tmp_p, btn_size;
-    MLV_Button continue_btn, stop_btn, save_btn, load_btn;
+    vector2i mouse_p;
+    vector2i tmp_p;
+    vector2i btn_size;
+
+    MLV_Button continue_btn;
+    MLV_Button stop_btn;
+    MLV_Button save_btn;
+    MLV_Button load_btn;
+
     MLV_Button_state mouse_state;
     int menu_dialog;
 
@@ -447,13 +563,17 @@ void show_menu(GameConfig *config) {
 
         MLV_get_mouse_position(&mouse_p.x, &mouse_p.y);
 
-        MLV_draw_filled_rectangle(MENU_POSS_X, MENU_POSS_Y,
-                                  MENU_WIDTH, MENU_HEIGHT,
-                                  MLV_COLOR_WHITE);
+        MLV_draw_filled_rectangle(
+            MENU_POSS_X, MENU_POSS_Y,
+            MENU_WIDTH, MENU_HEIGHT,
+            MLV_COLOR_WHITE
+        );
 
-        MLV_draw_rectangle(MENU_POSS_X, MENU_POSS_Y,
-                           MENU_WIDTH, MENU_HEIGHT,
-                           MLV_COLOR_BLACK);
+        MLV_draw_rectangle(
+            MENU_POSS_X, MENU_POSS_Y,
+            MENU_WIDTH, MENU_HEIGHT,
+            MLV_COLOR_BLACK
+        );
 
         MLV_draw_button(&continue_btn, &mouse_p);
         MLV_draw_button(&save_btn, &mouse_p);
@@ -465,6 +585,7 @@ void show_menu(GameConfig *config) {
         mouse_state = MLV_get_mouse_button_state(MLV_BUTTON_LEFT);
 
         if (mouse_state == MLV_PRESSED) {
+
             if (MLV_mouse_is_on_button(&continue_btn, &mouse_p)) {
                 menu_dialog = 0;
             }
@@ -474,12 +595,12 @@ void show_menu(GameConfig *config) {
                 menu_dialog = 0;
             }
 
-            if (mouse_state == MLV_PRESSED && MLV_mouse_is_on_button(&save_btn, &mouse_p)) {
+            if (MLV_mouse_is_on_button(&save_btn, &mouse_p)) {
                 serialize_game("save.bin", config);
                 menu_dialog = 0;
             }
 
-            if (mouse_state == MLV_PRESSED && MLV_mouse_is_on_button(&load_btn, &mouse_p)) {
+            if (MLV_mouse_is_on_button(&load_btn, &mouse_p)) {
                 deserialize_game("save.bin", config);
                 menu_dialog = 0;
             }
