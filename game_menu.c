@@ -1,4 +1,6 @@
 #include "game_menu.h"
+#include <stdlib.h>
+#include <time.h>
 
 /* =========================================================
    Noise background (time is in seconds)
@@ -26,8 +28,7 @@ static float noise(float x, float y, float t) {
 
 static MLV_Color noise_color(float x, float y, float r, float g, float b,
                             float time_s, float min_color, float max_color) {
-    float n;
-    n = noise(x * 0.1f, y * 0.1f, time_s * 0.15f);
+    float n = noise(x * 0.1f, y * 0.1f, time_s * 0.15f);
 
     r *= min_color + n * (max_color - min_color);
     g *= min_color + n * (max_color - min_color);
@@ -37,205 +38,77 @@ static MLV_Color noise_color(float x, float y, float r, float g, float b,
 }
 
 /* =========================================================
-   No-180 path following helpers
+   Menu snakes: square movement + safe init (body fits in bounds)
    ========================================================= */
-static int is_opposite_dir(SnakeDirection a, SnakeDirection b) {
-    return (a == SNAKE_DIRECTION_RIGTH  && b == SNAKE_DIRECTION_LEFT)  ||
-           (a == SNAKE_DIRECTION_LEFT  && b == SNAKE_DIRECTION_RIGTH)  ||
-           (a == SNAKE_DIRECTION_TOP   && b == SNAKE_DIRECTION_BOTTOM) ||
-           (a == SNAKE_DIRECTION_BOTTOM&& b == SNAKE_DIRECTION_TOP);
-}
 
-static SnakeDirection desired_dir_toward(vector2i from, vector2i to) {
-    if (to.x > from.x) return SNAKE_DIRECTION_RIGTH;
-    if (to.x < from.x) return SNAKE_DIRECTION_LEFT;
-    if (to.y > from.y) return SNAKE_DIRECTION_BOTTOM;
-    return SNAKE_DIRECTION_TOP;
-}
-
-/* Never requests a 180 turn; if target is “behind”, it takes a perpendicular turn first. */
-static void follow_path_step_no180(Snake* s, vector2i* path, int path_len, int* path_i) {
-    vector2i* head;
-    vector2i target;
-    SnakeDirection want;
-    SnakeDirection current;
-
-    head = get_snake_part_position(s, 0);
-    target = path[*path_i];
-
-    if (head->x == target.x && head->y == target.y) {
-        *path_i = (*path_i + 1) % path_len;
-        target = path[*path_i];
-    }
-
-    want = desired_dir_toward(*head, target);
-    current = s->direction;
-
-    if (is_opposite_dir(current, want)) {
-        /* Prefer a perpendicular move that moves closer on the other axis if possible */
-        if (target.y != head->y) {
-            want = (target.y > head->y) ? SNAKE_DIRECTION_BOTTOM : SNAKE_DIRECTION_TOP;
-        } else {
-            /* If already aligned in Y, step vertically (any legal perpendicular) */
-            want = (current == SNAKE_DIRECTION_RIGTH || current == SNAKE_DIRECTION_LEFT)
-                ? SNAKE_DIRECTION_BOTTOM
-                : SNAKE_DIRECTION_RIGTH;
-        }
-    }
-
-    set_snake_direction(s, want);
-}
-
-/* Spawn snake on a path index and align its initial direction with the next waypoint.
-   Also builds a short body BEHIND the head without moving it. */
-static void init_snake_on_path_aligned(
-    Snake* s, vector2i* path, int path_len,
-    int start_i, int length,
-    int* path_i_out
-) {
-    int next_i;
-    SnakeDirection d;
+static void init_snake_in_square_bounds(Snake* s, int x_min, int y_min, int x_max, int length) {
     int k;
+    int max_len;
     vector2i p;
 
-    next_i = (start_i + 1) % path_len;
-    d = desired_dir_toward(path[start_i], path[next_i]);
+    max_len = (x_max - x_min + 1);
+    if (max_len < 1) max_len = 1;
 
-    s->items[0] = path[start_i];
+    if (length < 1) length = 1;
+    if (length > max_len) length = max_len;
+    if (length > (int)MAX_SNAKE_SIZE) length = (int)MAX_SNAKE_SIZE;
+
+    /* Place head so body fits entirely inside (body extends left) */
+    s->items[0] = create_vector2i(x_min + (length - 1), y_min);
     s->head_index = 0;
-    s->count = length;
+    s->count = (size_t)length;
     s->back_buffer = 0;
     s->is_alive = 1;
 
-    /* Make direction consistent so we never “need” a reverse at the start */
-    s->direction = d;
-    s->to_rotate = d;
+    s->direction = SNAKE_DIRECTION_RIGTH;
+    s->to_rotate = SNAKE_DIRECTION_RIGTH;
 
-    /* Body behind head (opposite to d) */
     for (k = 1; k < length; k++) {
         p = s->items[k - 1];
-
-        if (d == SNAKE_DIRECTION_RIGTH)      p.x -= 1;
-        else if (d == SNAKE_DIRECTION_LEFT) p.x += 1;
-        else if (d == SNAKE_DIRECTION_BOTTOM)p.y -= 1;
-        else                                p.y += 1;
-
+        p.x -= 1;
         s->items[k] = p;
     }
-
-    /* Next waypoint to chase */
-    *path_i_out = next_i;
 }
 
-/* =========================================================
-   Letter path builders (blocky “pixel font” loops)
-   Each fills p[] and returns len.
-   ========================================================= */
-static int build_S(vector2i *p, int x0, int x1, int y0, int y1) {
-    int ym;
-    int i;
+static void update_snake_square_turn(Snake* s, int x_min, int y_min, int x_max, int y_max) {
+    vector2i* head = get_snake_part_position(s, 0);
 
-    ym = (y0 + y1) / 2;
-    i = 0;
+    if (s->direction == SNAKE_DIRECTION_RIGTH && head->x >= x_max) {
+        set_snake_direction(s, SNAKE_DIRECTION_BOTTOM);
 
-    p[i++] = create_vector2i(x0, y0); p[i++] = create_vector2i(x1, y0);
-    p[i++] = create_vector2i(x0, y0); p[i++] = create_vector2i(x0, ym);
-    p[i++] = create_vector2i(x0, ym); p[i++] = create_vector2i(x1, ym);
-    p[i++] = create_vector2i(x1, ym); p[i++] = create_vector2i(x1, y1);
-    p[i++] = create_vector2i(x1, y1); p[i++] = create_vector2i(x0, y1);
-    p[i++] = create_vector2i(x0, y1); p[i++] = create_vector2i(x0, y0);
+    } else if (s->direction == SNAKE_DIRECTION_BOTTOM && head->y >= y_max) {
+        set_snake_direction(s, SNAKE_DIRECTION_LEFT);
 
-    return i;
-}
+    } else if (s->direction == SNAKE_DIRECTION_LEFT && head->x <= x_min) {
+        set_snake_direction(s, SNAKE_DIRECTION_TOP);
 
-static int build_N(vector2i *p, int x0, int x1, int y0, int y1) {
-    int i;
-    int k;
-    int dx, dy, steps;
-    int xx, yy;
-
-    i = 0;
-
-    p[i++] = create_vector2i(x0, y1);
-    p[i++] = create_vector2i(x0, y0);
-
-    dx = x1 - x0;
-    dy = y1 - y0;
-    steps = (dx < dy) ? dx : dy;
-    if (steps < 2) steps = 2;
-
-    for (k = 1; k <= steps; k++) {
-        xx = x0 + k;
-        yy = y0 + k;
-        if (xx > x1) xx = x1;
-        if (yy > y1) yy = y1;
-        p[i++] = create_vector2i(xx, yy);
+    } else if (s->direction == SNAKE_DIRECTION_TOP && head->y <= y_min) {
+        set_snake_direction(s, SNAKE_DIRECTION_RIGTH);
     }
-
-    p[i++] = create_vector2i(x1, y0);
-    p[i++] = create_vector2i(x1, y1);
-    p[i++] = create_vector2i(x0, y1);
-
-    return i;
 }
 
-static int build_A(vector2i *p, int x0, int x1, int y0, int y1) {
-    int ym;
-    int i;
-
-    ym = (y0 + y1) / 2;
-    i = 0;
-
-    p[i++] = create_vector2i(x0, y1); p[i++] = create_vector2i(x0, y0);
-    p[i++] = create_vector2i(x1, y0); p[i++] = create_vector2i(x1, y1);
-    p[i++] = create_vector2i(x1, ym); p[i++] = create_vector2i(x0, ym);
-    p[i++] = create_vector2i(x0, y1);
-
-    return i;
-}
-
-static int build_K(vector2i *p, int x0, int x1, int y0, int y1) {
-    int ym;
-    int i;
-
-    ym = (y0 + y1) / 2;
-    i = 0;
-
-    p[i++] = create_vector2i(x0, y0); p[i++] = create_vector2i(x0, y1);
-    p[i++] = create_vector2i(x0, ym); p[i++] = create_vector2i(x1, y0);
-    p[i++] = create_vector2i(x0, ym); p[i++] = create_vector2i(x1, y1);
-    p[i++] = create_vector2i(x0, ym); p[i++] = create_vector2i(x0, y0);
-
-    return i;
-}
-
-static int build_E(vector2i *p, int x0, int x1, int y0, int y1) {
-    int ym;
-    int i;
-
-    ym = (y0 + y1) / 2;
-    i = 0;
-
-    p[i++] = create_vector2i(x1, y0); p[i++] = create_vector2i(x0, y0);
-    p[i++] = create_vector2i(x0, ym); p[i++] = create_vector2i(x1, ym);
-    p[i++] = create_vector2i(x0, ym); p[i++] = create_vector2i(x0, y1);
-    p[i++] = create_vector2i(x0, y1); p[i++] = create_vector2i(x1, y1);
-    p[i++] = create_vector2i(x0, y1); p[i++] = create_vector2i(x0, y0);
-
-    return i;
+/* Pick a new palette index different from current */
+static int pick_new_palette(int current, int palette_count) {
+    int r;
+    if (palette_count <= 1) return 0;
+    r = rand() % palette_count;
+    if (r == current) r = (r + 1) % palette_count;
+    return r;
 }
 
 /* =========================
    MAIN MENU SCREEN
    - Buttons on LEFT
    - Title "SNAKE GAME"
-   - Word "SNAKE" on center-right
-   - 2 snakes per letter (10 total)
+   - 5 snakes nested squares on RIGHT (pushed a bit further right)
+   - 2 snakes squares on LEFT centered under the buttons (no overlap)
+   - BG button top-right randomizes noise palettes
    ========================= */
 void show_menu_screen() {
     vector2i mouse_p, tmp_p, btn_size;
     MLV_Button start_signle_btn, start_two_player_btn, exit_btn, load_btn;
-    MLV_Button_state mouse_state;
+    MLV_Button bg_btn;
+    MLV_Button_state mouse_state, prev_mouse_state;
 
     int button_width;
     int menu_dialog;
@@ -257,94 +130,90 @@ void show_menu_screen() {
 
     int left_margin;
 
-    /* Word placement on the grid (center-right) */
-    int word_left, word_right, word_top, word_bot;
-    int letter_w;
-    int x0, x1, y0, y1;
+    /* ===== Snake skins (presets) ===== */
+    const int preset_right[5] = { 15, 14, 13, 12, 11 };
+    const int preset_left[2]  = { 10,  9 };
 
-    /* Paths (fixed max sizes) */
-    vector2i pathS[32], pathN[64], pathA[32], pathK[32], pathE[32];
-    int lenS, lenN, lenA, lenK, lenE;
+    /* Snake lengths (auto-clamped to each square width) */
+    const int snake_length_right = 6;
+    const int snake_length_left  = 5;
 
-    /* 10 snakes */
-    Snake s1, s2, n1, n2, a1, a2, k1, k2, e1, e2;
+    /* Total snakes: 5 (right) + 2 (left) */
+    Snake snakes_right[5];
+    Snake snakes_left[2];
 
-    /* waypoint indices */
-    int iS1, iS2, iN1, iN2, iA1, iA2, iK1, iK2, iE1, iE2;
+    int rx_min[5], ry_min[5], rx_max[5], ry_max[5];
+    int lx_min[2], ly_min[2], lx_max[2], ly_max[2];
 
-    /* Create window FIRST */
+    int outer_x_min, outer_x_max, outer_y_min, outer_y_max;
+    int i, inset;
+
+    /* ---- Noise palettes (top area and main area) ---- */
+    struct Palette {
+        float top_r, top_g, top_b;
+        float bot_r, bot_g, bot_b;
+    };
+
+    static const struct Palette palettes[] = {
+        /* purple + blue */
+        { 0.75f, 0.20f, 1.00f,   0.20f, 0.45f, 1.00f },
+        /* red + green */
+        { 1.00f, 0.15f, 0.15f,   0.15f, 1.00f, 0.20f },
+        /* red + blue */
+        { 1.00f, 0.15f, 0.15f,   0.20f, 0.35f, 1.00f },
+        /* yellow + orange */
+        { 1.00f, 0.95f, 0.20f,   1.00f, 0.55f, 0.10f }
+    };
+    const int palette_count = (int)(sizeof(palettes) / sizeof(palettes[0]));
+    int palette_i = 0;
+
+    /* Create window FIRST (must be done before any sprite loads) */
     init_game_screen();
+    srand((unsigned int)time(NULL));
 
-    /* Place word on center-right */
-    word_left  = GRID_SIZE / 2;
-    word_right = GRID_SIZE - 2;
-    word_top   = GRID_SIZE / 4;
-    word_bot   = GRID_SIZE - 3;
+    /* ----- Right side: outer square on the RIGHT, sized to fit 5 nested squares ----- */
+    /* To push it a bit more right, we allow a smaller inner square size (3 instead of 4) */
+    {
+        int min_inner = 3;                 /* smaller inner => whole pack shifts right */
+        int need = min_inner + 2 * (5 - 1);/* min_inner + 8 */
 
-    if (word_left < 1) word_left = 1;
-    if (word_top < 1) word_top = 1;
-    if (word_bot > GRID_SIZE - 2) word_bot = GRID_SIZE - 2;
+        outer_x_max = GRID_SIZE - 2;
+        outer_y_min = 2;
+        outer_y_max = GRID_SIZE - 3;
 
-    letter_w = (word_right - word_left) / 5;
-    if (letter_w < 4) letter_w = 4;
+        outer_x_min = outer_x_max - need;
+        if (outer_x_min < 1) outer_x_min = 1;
 
-    /* Clamp if too wide */
-    if (word_left + 5 * letter_w > word_right) {
-        word_left = word_right - 5 * letter_w;
-        if (word_left < 1) word_left = 1;
+        if ((outer_y_max - outer_y_min) < need) {
+            outer_y_min = 1;
+            outer_y_max = outer_y_min + need;
+            if (outer_y_max > GRID_SIZE - 2) outer_y_max = GRID_SIZE - 2;
+        }
     }
 
-    y0 = word_top;
-    y1 = word_bot;
+    for (i = 0; i < 5; i++) {
+        inset = i;
 
-    /* Build S */
-    x0 = word_left + 0 * letter_w;
-    x1 = x0 + letter_w - 2;
-    lenS = build_S(pathS, x0, x1, y0, y1);
+        rx_min[i] = outer_x_min + inset;
+        rx_max[i] = outer_x_max - inset;
+        ry_min[i] = outer_y_min + inset;
+        ry_max[i] = outer_y_max - inset;
 
-    /* Build N */
-    x0 = word_left + 1 * letter_w;
-    x1 = x0 + letter_w - 2;
-    lenN = build_N(pathN, x0, x1, y0, y1);
+        snakes_right[i] = create_snake();
+        load_snake_sprite(&snakes_right[i], preset_right[i]);
+        init_snake_in_square_bounds(&snakes_right[i], rx_min[i], ry_min[i], rx_max[i], snake_length_right);
+    }
 
-    /* Build A */
-    x0 = word_left + 2 * letter_w;
-    x1 = x0 + letter_w - 2;
-    lenA = build_A(pathA, x0, x1, y0, y1);
+    /* ----- Left side: 2 squares centered under the buttons ----- */
+    /* These x-ranges are intentionally kept away from the right pack to avoid overlap. */
+    lx_min[0] = 1;  lx_max[0] = 6;  ly_min[0] = 7;  ly_max[0] = 14; /* outer under-buttons square */
+    lx_min[1] = 2;  lx_max[1] = 5;  ly_min[1] = 8;  ly_max[1] = 13; /* inner under-buttons square */
 
-    /* Build K */
-    x0 = word_left + 3 * letter_w;
-    x1 = x0 + letter_w - 2;
-    lenK = build_K(pathK, x0, x1, y0, y1);
-
-    /* Build E */
-    x0 = word_left + 4 * letter_w;
-    x1 = x0 + letter_w - 2;
-    lenE = build_E(pathE, x0, x1, y0, y1);
-
-    /* Create snakes (this loads sprites) */
-    s1 = create_snake(); s2 = create_snake();
-    n1 = create_snake(); n2 = create_snake();
-    a1 = create_snake(); a2 = create_snake();
-    k1 = create_snake(); k2 = create_snake();
-    e1 = create_snake(); e2 = create_snake();
-
-    /* Init snakes on their letter paths:
-       start2 uses half-loop offset so it “chases” the other one on the same letter */
-    init_snake_on_path_aligned(&s1, pathS, lenS, 0,        4, &iS1);
-    init_snake_on_path_aligned(&s2, pathS, lenS, lenS/2,   4, &iS2);
-
-    init_snake_on_path_aligned(&n1, pathN, lenN, 0,        4, &iN1);
-    init_snake_on_path_aligned(&n2, pathN, lenN, lenN/2,   4, &iN2);
-
-    init_snake_on_path_aligned(&a1, pathA, lenA, 0,        4, &iA1);
-    init_snake_on_path_aligned(&a2, pathA, lenA, lenA/2,   4, &iA2);
-
-    init_snake_on_path_aligned(&k1, pathK, lenK, 0,        4, &iK1);
-    init_snake_on_path_aligned(&k2, pathK, lenK, lenK/2,   4, &iK2);
-
-    init_snake_on_path_aligned(&e1, pathE, lenE, 0,        4, &iE1);
-    init_snake_on_path_aligned(&e2, pathE, lenE, lenE/2,   4, &iE2);
+    for (i = 0; i < 2; i++) {
+        snakes_left[i] = create_snake();
+        load_snake_sprite(&snakes_left[i], preset_left[i]);
+        init_snake_in_square_bounds(&snakes_left[i], lx_min[i], ly_min[i], lx_max[i], snake_length_left);
+    }
 
     /* Buttons on LEFT */
     button_width = SCREEN_WIDTH / 3;
@@ -380,10 +249,25 @@ void show_menu_screen() {
         menu_button_color, menu_text_color, menu_highlight_color
     );
 
-    /* Loop state */
+    /* BG button top-right */
+    {
+        vector2i pos, size;
+        int bw = 90;
+        int bh = 38;
+
+        pos = create_vector2i(SCREEN_WIDTH - left_margin - bw, left_margin);
+        size = create_vector2i(bw, bh);
+
+        bg_btn = MLV_create_button(
+            "BG", pos, size,
+            menu_button_color, menu_text_color, menu_highlight_color
+        );
+    }
+
     menu_dialog = 1;
     time_s = 0.0f;
     next_move = 0;
+    prev_mouse_state = MLV_RELEASED;
 
     while (menu_dialog) {
 
@@ -398,12 +282,20 @@ void show_menu_screen() {
                 if (y < title_height) {
                     MLV_draw_filled_rectangle(
                         x, y, tile, tile,
-                        noise_color(x, y, 0, 0.5f, 1.f, time_s, 180.f, 255.f)
+                        noise_color(x, y,
+                                    palettes[palette_i].top_r,
+                                    palettes[palette_i].top_g,
+                                    palettes[palette_i].top_b,
+                                    time_s, 180.f, 255.f)
                     );
                 } else {
                     MLV_draw_filled_rectangle(
                         x, y, tile, tile,
-                        noise_color(x, y, 0, 1.f, 0, time_s, 185.f, 255.f)
+                        noise_color(x, y,
+                                    palettes[palette_i].bot_r,
+                                    palettes[palette_i].bot_g,
+                                    palettes[palette_i].bot_b,
+                                    time_s, 185.f, 255.f)
                     );
                 }
             }
@@ -423,28 +315,23 @@ void show_menu_screen() {
             MLV_draw_text(tx + 2, ty, title, MLV_COLOR_BLACK);
             MLV_draw_text(tx, ty - 2, title, MLV_COLOR_BLACK);
             MLV_draw_text(tx, ty + 2, title, MLV_COLOR_BLACK);
-
             MLV_draw_text(tx, ty, title, MLV_COLOR_WHITE);
         }
 
-        /* Draw snakes (behind buttons) */
-        draw_snake_body(&s1, (float)next_move / MOVE_TIME); draw_snake_head(&s1, (float)next_move / MOVE_TIME);
-        draw_snake_body(&s2, (float)next_move / MOVE_TIME); draw_snake_head(&s2, (float)next_move / MOVE_TIME);
-
-        draw_snake_body(&n1, (float)next_move / MOVE_TIME); draw_snake_head(&n1, (float)next_move / MOVE_TIME);
-        draw_snake_body(&n2, (float)next_move / MOVE_TIME); draw_snake_head(&n2, (float)next_move / MOVE_TIME);
-
-        draw_snake_body(&a1, (float)next_move / MOVE_TIME); draw_snake_head(&a1, (float)next_move / MOVE_TIME);
-        draw_snake_body(&a2, (float)next_move / MOVE_TIME); draw_snake_head(&a2, (float)next_move / MOVE_TIME);
-
-        draw_snake_body(&k1, (float)next_move / MOVE_TIME); draw_snake_head(&k1, (float)next_move / MOVE_TIME);
-        draw_snake_body(&k2, (float)next_move / MOVE_TIME); draw_snake_head(&k2, (float)next_move / MOVE_TIME);
-
-        draw_snake_body(&e1, (float)next_move / MOVE_TIME); draw_snake_head(&e1, (float)next_move / MOVE_TIME);
-        draw_snake_body(&e2, (float)next_move / MOVE_TIME); draw_snake_head(&e2, (float)next_move / MOVE_TIME);
+        /* Draw snakes FIRST so they appear under buttons */
+        for (i = 0; i < 5; i++) {
+            draw_snake_body(&snakes_right[i], (float)next_move / MOVE_TIME);
+            draw_snake_head(&snakes_right[i], (float)next_move / MOVE_TIME);
+        }
+        for (i = 0; i < 2; i++) {
+            draw_snake_body(&snakes_left[i], (float)next_move / MOVE_TIME);
+            draw_snake_head(&snakes_left[i], (float)next_move / MOVE_TIME);
+        }
 
         /* Buttons */
         MLV_get_mouse_position(&mouse_p.x, &mouse_p.y);
+
+        MLV_draw_button(&bg_btn, &mouse_p);
 
         MLV_draw_button(&start_signle_btn, &mouse_p);
         MLV_draw_button(&start_two_player_btn, &mouse_p);
@@ -455,7 +342,12 @@ void show_menu_screen() {
 
         mouse_state = MLV_get_mouse_button_state(MLV_BUTTON_LEFT);
 
-        if (mouse_state == MLV_PRESSED) {
+        /* Debounced click */
+        if (mouse_state == MLV_PRESSED && prev_mouse_state == MLV_RELEASED) {
+
+            if (MLV_mouse_is_on_button(&bg_btn, &mouse_p)) {
+                palette_i = pick_new_palette(palette_i, palette_count);
+            }
 
             if (MLV_mouse_is_on_button(&start_signle_btn, &mouse_p)) {
                 init_game(&config, GAME_SINGLE_PLAYER_MODE);
@@ -483,24 +375,18 @@ void show_menu_screen() {
             }
         }
 
+        prev_mouse_state = mouse_state;
+
         /* Movement tick */
         if (next_move >= MOVE_TIME) {
-
-            follow_path_step_no180(&s1, pathS, lenS, &iS1); move_snake(&s1);
-            follow_path_step_no180(&s2, pathS, lenS, &iS2); move_snake(&s2);
-
-            follow_path_step_no180(&n1, pathN, lenN, &iN1); move_snake(&n1);
-            follow_path_step_no180(&n2, pathN, lenN, &iN2); move_snake(&n2);
-
-            follow_path_step_no180(&a1, pathA, lenA, &iA1); move_snake(&a1);
-            follow_path_step_no180(&a2, pathA, lenA, &iA2); move_snake(&a2);
-
-            follow_path_step_no180(&k1, pathK, lenK, &iK1); move_snake(&k1);
-            follow_path_step_no180(&k2, pathK, lenK, &iK2); move_snake(&k2);
-
-            follow_path_step_no180(&e1, pathE, lenE, &iE1); move_snake(&e1);
-            follow_path_step_no180(&e2, pathE, lenE, &iE2); move_snake(&e2);
-
+            for (i = 0; i < 5; i++) {
+                update_snake_square_turn(&snakes_right[i], rx_min[i], ry_min[i], rx_max[i], ry_max[i]);
+                move_snake(&snakes_right[i]);
+            }
+            for (i = 0; i < 2; i++) {
+                update_snake_square_turn(&snakes_left[i], lx_min[i], ly_min[i], lx_max[i], ly_max[i]);
+                move_snake(&snakes_left[i]);
+            }
             next_move = 0;
         }
 
@@ -520,13 +406,11 @@ void show_menu_screen() {
     }
 
     /* Cleanup snakes */
-    free_snake(&s1); free_snake(&s2);
-    free_snake(&n1); free_snake(&n2);
-    free_snake(&a1); free_snake(&a2);
-    free_snake(&k1); free_snake(&k2);
-    free_snake(&e1); free_snake(&e2);
+    for (i = 0; i < 5; i++) free_snake(&snakes_right[i]);
+    for (i = 0; i < 2; i++) free_snake(&snakes_left[i]);
 
     /* Cleanup buttons + window */
+    MLV_free_button(&bg_btn);
     MLV_free_button(&load_btn);
     MLV_free_button(&start_signle_btn);
     MLV_free_button(&start_two_player_btn);
@@ -590,12 +474,12 @@ void show_menu(GameConfig *config) {
                 menu_dialog = 0;
             }
 
-            if (MLV_mouse_is_on_button(&save_btn, &mouse_p)) {
+            if (mouse_state == MLV_PRESSED && MLV_mouse_is_on_button(&save_btn, &mouse_p)) {
                 serialize_game("save.bin", config);
                 menu_dialog = 0;
             }
 
-            if (MLV_mouse_is_on_button(&load_btn, &mouse_p)) {
+            if (mouse_state == MLV_PRESSED && MLV_mouse_is_on_button(&load_btn, &mouse_p)) {
                 deserialize_game("save.bin", config);
                 menu_dialog = 0;
             }
