@@ -332,6 +332,8 @@ void select_solo_skin_dialog(GameConfig *config) {
         } else {
             time_s += (float)delta_time / (float)SEC_IN_NSEC;
         }
+        if (time_s > 773.f)
+            time_s = 0;
     }
 
     if (snake_sprite != NULL)
@@ -500,6 +502,8 @@ void select_duo_skin_dialog(GameConfig *config) {
         } else {
             time_s += (float)delta_time / (float)SEC_IN_NSEC;
         }
+        if (time_s > 773.f)
+            time_s = 0;
     }
 
     if (first_snake_sprite != NULL)
@@ -603,7 +607,6 @@ void show_menu_screen() {
 
     title_font = MLV_load_font("ressources/fonts/PixelifySans-VariableFont_wght.ttf", 64);
 
-    srand((unsigned int)time(NULL));
     palette_i = 0;
 
     /* -------------------------------------------------
@@ -723,11 +726,13 @@ void show_menu_screen() {
      * Loop state
      * ------------------------------------------------- */
     menu_dialog = 1;
-    time_s = 0.0f;
+    time_s = 760.0f;
     next_move = 0;
     prev_mouse_state = MLV_RELEASED;
 
     while (menu_dialog) {
+
+        MLV_get_mouse_position(&mouse_p.x, &mouse_p.y);
 
         clock_gettime(CLOCK_REALTIME, &start_time);
 
@@ -846,6 +851,9 @@ void show_menu_screen() {
             next_move += delta_time;
             time_s += (float)delta_time / (float)SEC_IN_NSEC;
         }
+
+        if (time_s > 773.f)
+            time_s = 0;
     }
 
     /* Cleanup snakes */

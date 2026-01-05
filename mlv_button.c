@@ -22,7 +22,7 @@ MLV_Button MLV_create_button_with_font(const char *text, const char *font, int f
 MLV_Button MLV_create_button(const char *text,
                              vector2i pos, vector2i size,
                              MLV_Color fill_color, MLV_Color text_color, MLV_Color highlight_color) {
-    return MLV_create_button_with_font(text, "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 10, pos, size, fill_color, text_color, highlight_color);
+    return MLV_create_button_with_font(text, "ressources/fonts/DejaVuSans.ttf", 10, pos, size, fill_color, text_color, highlight_color);
 }
 
 MLV_Button MLV_create_base_button(const char *text, vector2i pos, vector2i size) {
