@@ -1,0 +1,49 @@
+\documentclass[a4paper,12pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage{hyperref}
+
+\title{Documentation du projet \textbf{MLV Snake}}
+\author{VOLIANSKYI Nikita \\ MELKONIAN Mark}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section*{Aperçu du projet}
+\textbf{MLV Snake} est un projet développé dans le cadre du cours \textit{Programmation impérative 2} (L2 Informatique, 2ème année).  
+Il s'agit d'une implémentation classique du jeu \textit{Snake} utilisant la bibliothèque \textbf{MLV} pour la gestion des graphismes et des entrées utilisateur.
+
+\section*{Fonctionnalités principales}
+\begin{itemize}
+    \item Respect de toutes les règles classiques du jeu Snake.
+    \item Mode pour deux joueurs ajouté.
+    \item Sauvegarde des scores et de la partie dans des fichiers binaires.
+    \item Ajout de portails pour diversifier le gameplay.
+    \item Différentes apparences pour les serpents et possibilité de les sélectionner avant de commencer la partie.
+    \item Animations sur l'écran d'accueil pour un meilleur rendu visuel.
+\end{itemize}
+
+\section*{Documentation}
+La documentation du projet a été générée avec \textbf{Doxygen}.  
+Un fichier Doxygen est inclus pour permettre la génération facile de la documentation complète du code.
+
+\section*{Compilation et exécution}
+Le projet peut être compilé et exécuté grâce au \texttt{Makefile}.  
+La compilation génère un exécutable nommé \textbf{snake\_game}.
+
+\section*{Équipe du projet}
+\begin{itemize}
+    \item \textbf{VOLIANSKYI Nikita}
+    \item \textbf{MELKONIAN Mark}
+\end{itemize}
+
+\section*{Liens utiles}
+\begin{itemize}
+    \item \href{https://www.doxygen.nl/manual/index.html}{Documentation Doxygen}
+    \item \href{https://mlv-library.github.io/}{MLV Library}
+\end{itemize}
+
+\end{document}
