@@ -234,20 +234,20 @@ void select_solo_skin_dialog(GameConfig *config) {
     unsigned long delta_time;
     float time_s;
 
-    prev_btn = MLV_create_button("<=", 
+    prev_btn = MLV_create_button_with_font("<=", "ressources/fonts/PixelifySans-VariableFont_wght.ttf", 24,
         create_vector2i(SCREEN_WIDTH / 2 - SCREEN_WIDTH / 15, SCREEN_HEIGH / 2), 
         create_vector2i(SCREEN_WIDTH / 15, MENU_BUTTON_HEIGHT * 1.5), 
-        MLV_COLOR_WHITE, MLV_COLOR_BLUE, MLV_COLOR_GREEN);
+        MLV_COLOR_WHITE, MLV_COLOR_BLACK, MLV_COLOR_GREEN);
 
-    next_btn = MLV_create_button("=>", 
+    next_btn = MLV_create_button_with_font("=>", "ressources/fonts/PixelifySans-VariableFont_wght.ttf", 24,
         create_vector2i(SCREEN_WIDTH / 2, SCREEN_HEIGH  / 2), 
         create_vector2i(SCREEN_WIDTH / 15, MENU_BUTTON_HEIGHT * 1.5), 
-        MLV_COLOR_WHITE, MLV_COLOR_BLUE, MLV_COLOR_GREEN);
+        MLV_COLOR_WHITE, MLV_COLOR_BLACK, MLV_COLOR_GREEN);
 
-    close_btn = MLV_create_button("Start game", 
+    close_btn = MLV_create_button_with_font("Start game", "ressources/fonts/PixelifySans-VariableFont_wght.ttf", 36,
         create_vector2i(SCREEN_WIDTH / 2 - SCREEN_WIDTH / 6, SCREEN_HEIGH * 3 / 4), 
         create_vector2i(SCREEN_WIDTH / 3, MENU_BUTTON_HEIGHT * 1.5), 
-        MLV_COLOR_WHITE, MLV_COLOR_BLUE, MLV_COLOR_GREEN);
+        MLV_COLOR_WHITE, MLV_COLOR_BLACK, MLV_COLOR_GREEN);
 
     title_font = MLV_load_font("ressources/fonts/PixelifySans-VariableFont_wght.ttf", 64);
     
@@ -365,10 +365,10 @@ void select_duo_skin_dialog(GameConfig *config) {
     unsigned long delta_time;
     float time_s;
 
-    close_btn = MLV_create_button("Start game", 
+    close_btn = MLV_create_button_with_font("Start game", "ressources/fonts/PixelifySans-VariableFont_wght.ttf", 36,
         create_vector2i(SCREEN_WIDTH / 2 - SCREEN_WIDTH / 6, SCREEN_HEIGH * 3 / 4), 
         create_vector2i(SCREEN_WIDTH / 3, MENU_BUTTON_HEIGHT * 1.5), 
-        MLV_COLOR_WHITE, MLV_COLOR_BLUE, MLV_COLOR_GREEN);
+        MLV_COLOR_WHITE, MLV_COLOR_BLACK, MLV_COLOR_GREEN);
     
     title_font = MLV_load_font("ressources/fonts/PixelifySans-VariableFont_wght.ttf", 64);
     text_font = MLV_load_font("ressources/fonts/PixelifySans-VariableFont_wght.ttf", 21);
@@ -667,32 +667,36 @@ void show_menu_screen() {
     left_margin = SCREEN_WIDTH / 20;
 
     menu_button_color = MLV_COLOR_WHITE;
-    menu_text_color = MLV_COLOR_BLUE;
+    menu_text_color = MLV_COLOR_BLACK;
     menu_highlight_color = MLV_COLOR_GREEN;
 
     tmp_p = create_vector2i(left_margin, SCREEN_HEIGH / 4);
     btn_size = create_vector2i(button_width, MENU_BUTTON_HEIGHT * 1.5);
 
-    start_signle_btn = MLV_create_button(
-        "Single Player", tmp_p, btn_size,
+    start_signle_btn = MLV_create_button_with_font(
+        "Single Player", "ressources/fonts/PixelifySans-VariableFont_wght.ttf", 36, 
+        tmp_p, btn_size,
         menu_button_color, menu_text_color, menu_highlight_color
     );
 
     tmp_p.y += MENU_PADDDING + MENU_BUTTON_HEIGHT;
-    start_two_player_btn = MLV_create_button(
-        "Two Player", tmp_p, btn_size,
+    start_two_player_btn = MLV_create_button_with_font(
+        "Two Player", "ressources/fonts/PixelifySans-VariableFont_wght.ttf", 36, 
+        tmp_p, btn_size,
         menu_button_color, menu_text_color, menu_highlight_color
     );
 
     tmp_p.y += MENU_PADDDING + MENU_BUTTON_HEIGHT;
-    load_btn = MLV_create_button(
-        "Load Last Game", tmp_p, btn_size,
+    load_btn = MLV_create_button_with_font(
+        "Load Last Game", "ressources/fonts/PixelifySans-VariableFont_wght.ttf", 36, 
+        tmp_p, btn_size,
         menu_button_color, menu_text_color, menu_highlight_color
     );
 
     tmp_p.y += MENU_PADDDING + MENU_BUTTON_HEIGHT;
-    exit_btn = MLV_create_button(
-        "Exit Game", tmp_p, btn_size,
+    exit_btn = MLV_create_button_with_font(
+        "Exit Game", "ressources/fonts/PixelifySans-VariableFont_wght.ttf", 36, 
+        tmp_p, btn_size,
         menu_button_color, menu_text_color, menu_highlight_color
     );
 
@@ -708,8 +712,9 @@ void show_menu_screen() {
         pos = create_vector2i(SCREEN_WIDTH - left_margin - bw, left_margin);
         size = create_vector2i(bw, bh);
 
-        bg_btn = MLV_create_button(
-            "BG", pos, size,
+        bg_btn = MLV_create_button_with_font(
+            "BG", "ressources/fonts/PixelifySans-VariableFont_wght.ttf", 36, 
+            pos, size,
             menu_button_color, menu_text_color, menu_highlight_color
         );
     }
