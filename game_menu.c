@@ -18,11 +18,11 @@
  * Background noise helpers
  * ========================================================= */
 
-static float hash(float n) {
+float hash(float n) {
     return (float)fmod(sin(n) * 43758.5453123, 1.0);
 }
 
-static float noise(float x, float y, float t) {
+float noise(float x, float y, float t) {
     float fx;
     float fy;
 
@@ -54,7 +54,7 @@ static float noise(float x, float y, float t) {
     return lerp1 + v * (lerp2 - lerp1);
 }
 
-static MLV_Color noise_color(
+MLV_Color noise_color(
     float x, float y,
     float r, float g, float b,
     float time_s,
@@ -75,7 +75,7 @@ static MLV_Color noise_color(
  * Decorationnnn menu snakes (square movement)
  * ========================================================= */
 
-static void init_snake_in_square_bounds(Snake* s, int x_min, int y_min, int x_max, int length) {
+void init_snake_in_square_bounds(Snake* s, int x_min, int y_min, int x_max, int length) {
     int k;
     int max_len;
     vector2i p;
@@ -112,7 +112,7 @@ static void init_snake_in_square_bounds(Snake* s, int x_min, int y_min, int x_ma
     }
 }
 
-static void update_snake_square_turn(Snake* s, int x_min, int y_min, int x_max, int y_max) {
+void update_snake_square_turn(Snake* s, int x_min, int y_min, int x_max, int y_max) {
     vector2i* head;
 
     head = get_snake_part_position(s, 0);
@@ -135,7 +135,7 @@ static void update_snake_square_turn(Snake* s, int x_min, int y_min, int x_max, 
  * Background palette switching
  * ========================================================= */
 
-static int pick_new_palette(int current, int palette_count) {
+int pick_new_palette(int current, int palette_count) {
     int r;
 
     if (palette_count <= 1) {
@@ -155,7 +155,7 @@ static int pick_new_palette(int current, int palette_count) {
  * ========================================================= */
 void draw_background(float time_s, int palette_i) {
     int tile, title_height, x, y;
-    static const struct Palette palettes[] = {
+    const struct Palette palettes[] = {
         /* purple + blue */
         { 0.75f, 0.20f, 1.00f,   0.20f, 0.45f, 1.00f },
         /* red + green */

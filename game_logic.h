@@ -43,6 +43,26 @@ void game_input(GameConfig *config);
 void check_outofbounds(Snake* snake);
 
 /**
+ * @brief Loads the saved high scores.
+ *
+ * Initializes scores to zero if loading fails.
+ *
+ * @param[out] score_list Array to store loaded scores.
+ */
+void load_score(unsigned int *score_list);
+
+/**
+ * @brief Updates the high score list with a new score.
+ *
+ * @param[in] new_score The score to insert into the list.
+ *
+ * @details
+ * The function loads the current score list from "score.bin", inserts the new score
+ * in descending order, avoids duplicates, and then saves the updated list back to the file.
+ */
+void update_score_list(unsigned int new_score);
+
+/**
  * @brief Checks if the snake has eaten the apple.
  *
  * @param[in,out] config Pointer to the game configuration.
@@ -54,6 +74,20 @@ void check_outofbounds(Snake* snake);
  * and the snake's movement timer is adjusted (speed up).
  */
 int check_apple_eat(GameConfig *config, Snake* snake);
+
+/**
+ * @brief Checks if the snake has collided with a portal.
+ *
+ * @param[in] snake Pointer to the snake.
+ * @param[in] config Pointer to the game configuration.
+ * @return GameObject* Returns a pointer to the destination portal if a collision occurs, NULL otherwise.
+ *
+ * @details
+ * The function detects if the snake's head is on a portal. If so, it selects
+ * a random other portal as the destination, ensuring the snake does not
+ * teleport into itself.
+ */
+GameObject* check_portal_colision(Snake *snake, GameConfig *config);
 
 /**
  * @brief Checks if the snake collided with itself.
@@ -96,7 +130,6 @@ void update_snake(GameConfig *config, Snake *snake, Snake *others, int count);
  */
 void update_game(GameConfig *config);
 
-
 /**
  * @brief Main game loop.
  *
@@ -107,15 +140,5 @@ void update_game(GameConfig *config);
  * Runs until config->force_exit is set.
  */
 void game_cycle(GameConfig *config);
-
-
-/**
- * @brief Starts the game.
- *
- * @details
- * Initializes and runs the main game loop. Typically called from main().
- */
-void start();
-
 
 #endif /* _GAME_LOGIC_H */

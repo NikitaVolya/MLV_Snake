@@ -11,8 +11,30 @@
 
 #include"game_config.h"
 
+/**
+ * @brief Saves the score list to a binary file.
+ *
+ * @param[in] file_name Path to the file.
+ * @param[in] score_list Pointer to the array of scores.
+ * @param[in] n Number of scores to write.
+ * @return int Returns 1 on success, 0 on failure.
+ *
+ * @details
+ * Opens the specified file and writes the scores as binary data.
+ */
 int serialize_game_score(const char *file_name, unsigned int *score_list, int n);
 
+/**
+ * @brief Loads the score list from a binary file.
+ *
+ * @param[in] file_name Path to the file.
+ * @param[out] score_list Pointer to the array to store scores.
+ * @param[in] n Number of scores to read.
+ * @return int Returns 1 on success, 0 on failure.
+ *
+ * @details
+ * Opens the specified file and reads the scores as binary data.
+ */
 int deserialize_game_score(const char *file_name, unsigned int *score_list, int n);
 
 /**

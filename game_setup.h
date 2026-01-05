@@ -8,7 +8,7 @@
 
 #define GRID_SIZE 20 /**< Number of cells in one dimension of the grid */
 
-#define PORTAL_REPLACE_CHANCE 30    
+#define PORTAL_REPLACE_CHANCE 30  /**< Chance (0–100) to replace a portal with another object */
 
 #if (PORTAL_REPLACE_CHANCE < 0 || PORTAL_REPLACE_CHANCE > 100)
 #error "PORTAL_REPLACE_CHANCE must to be beetwen 0 AND 100"

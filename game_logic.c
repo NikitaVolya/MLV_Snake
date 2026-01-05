@@ -66,7 +66,6 @@ void game_input(GameConfig* config) {
     
 }
 
-
 void check_outofbounds(Snake *snake) {
     vector2i *head_p;
     

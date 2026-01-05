@@ -37,13 +37,11 @@ void draw_straigth_body_part(SnakeSprite *sprite, vector2i delta_p, int x, int y
 
     image = MLV_copy_image(sprite->straight_body);
 
-    /* shift part next to head */
-    if (index == 1 && 
-        delta_p.x * delta_p.x <= 4 && 
-        delta_p.y * delta_p.y <= 4) {
+    /* cut part next to head */
+    if (index == 1 &&  delta_p.x * delta_p.x <= 4 && delta_p.y * delta_p.y <= 4) {
         delete_image_part(image,
-                            GRID_CELL_DRAW_SIZE * (shift + 0.22f > 1.f ? 1.f : shift + 0.22f), 0,
-                            GRID_CELL_DRAW_SIZE, GRID_CELL_DRAW_SIZE);
+                          GRID_CELL_DRAW_SIZE * (shift + 0.22f > 1.f ? 1.f : shift + 0.22f), 0,
+                          GRID_CELL_DRAW_SIZE, GRID_CELL_DRAW_SIZE);
     }
 
     /* bottom rotation */
@@ -132,42 +130,6 @@ void draw_snake_body(Snake *snake, float shift) {
     
 }
 
-void draw_score(unsigned int score) {
-    int i;
-    char text[10];
-
-    strcpy(text, "         ");
-
-    if (score == 0) text[9] = '0'; 
-
-    for(i = 9; i >= 0 && score > 0; i--) {
-        text[i] = '0' + score % 10;
-        score /= 10;
-    }
-
-    MLV_draw_text(0, 0, text, MLV_COLOR_BLACK);
-}
-
-void draw_score_list(unsigned int *score_list) {
-    int i, j;
-    unsigned int value;
-    char text[13];
-
-    for (i = 0; i < GAME_SCORE_LIST_SIZE && score_list[i] > 0; i++) {
-
-        strcpy(text, "  .         ");
-        if (i == 9) text[0] = '1';
-        text[1] = '0' + (i + 1) % 10;
-
-        value = score_list[i];
-        for (j = 12; j > 0 && value > 0; j--) {
-            text[j] = '0' + value % 10;
-            value /= 10;
-        }
-        
-        MLV_draw_text(0, i * 20 + 200, text, MLV_COLOR_BLACK);
-    }
-}
 
 void draw_snake_head(Snake *snake, float shift) {
     vector2i *head_p;
@@ -213,6 +175,43 @@ void draw_snake_head(Snake *snake, float shift) {
     }
 }
 
+void draw_score(unsigned int score) {
+    int i;
+    char text[17];
+
+    strcpy(text, "Score:          ");
+
+    if (score == 0) text[9] = '0'; 
+
+    for(i = 9; i >= 0 && score > 0; i--) {
+        text[i] = '0' + score % 10;
+        score /= 10;
+    }
+
+    MLV_draw_text(5, 5, text, MLV_COLOR_BLACK);
+}
+
+void draw_score_list(unsigned int *score_list) {
+    int i, j;
+    unsigned int value;
+    char text[13];
+
+    for (i = 0; i < GAME_SCORE_LIST_SIZE && score_list[i] > 0; i++) {
+
+        strcpy(text, "  .         ");
+        if (i == 9) text[0] = '1';
+        text[1] = '0' + (i + 1) % 10;
+
+        value = score_list[i];
+        for (j = 12; j > 0 && value > 0; j--) {
+            text[j] = '0' + value % 10;
+            value /= 10;
+        }
+        
+        MLV_draw_text(5, i * 20 + 200, text, MLV_COLOR_BLACK);
+    }
+}
+
 void draw_apple(GameConfig *config, GameObject *object) {
     int x, y;
 
@@ -250,9 +249,6 @@ void draw_bottoms_game_objects(GameConfig *config) {
         switch (object->type) {
         case GAME_OBJECT_APPLE:
             draw_apple(config, object);
-            break;
-        case GAME_OBJECT_PORTAL:
-            draw_portal(object);
             break;
         default:
             break;

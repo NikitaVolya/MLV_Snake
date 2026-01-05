@@ -156,7 +156,6 @@ void free_game_objects(GameConfig *game_config) {
     }
 }
 
-
 void free_game_config(GameConfig *game_config) {
 
     free_snake(&game_config->first_player);
