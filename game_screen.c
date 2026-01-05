@@ -240,7 +240,6 @@ void draw_apple(GameConfig *config, GameObject *object) {
     if (object->sprite == NULL) {
         MLV_draw_filled_rectangle(x, y, GRID_CELL_DRAW_SIZE, GRID_CELL_DRAW_SIZE, object->color);
     } else {
-        
         y += sinf(config->time / 60.f) * GRID_CELL_DRAW_SIZE / 10.f;
         MLV_draw_image(object->sprite, x, y);
     }
@@ -259,7 +258,7 @@ void draw_portal(GameObject *object) {
     }
 }
 
-void draw_game_objects(GameConfig *config) {
+void draw_bottoms_game_objects(GameConfig *config) {
     GameObject* object;
     int i;
 
@@ -279,11 +278,28 @@ void draw_game_objects(GameConfig *config) {
     }
 }
 
+void draw_uppers_game_objects(GameConfig *config) {
+    GameObject* object;
+    int i;
+
+    for (i = 0; i < GAME_OBJECTS_NUMBER; i++) {
+        object = &config->objects[i];
+
+        switch (object->type) {
+        case GAME_OBJECT_PORTAL:
+            draw_portal(object);
+            break;
+        default:
+            break;
+        }
+    }
+}
+
 void draw_game(GameConfig *config, unsigned int *score_list, float shift) {
 
     MLV_clear_window(MLV_COLOR_WHITE);
 
-    draw_game_objects(config);
+    draw_bottoms_game_objects(config);
 
     draw_snake_body(&config->first_player, shift);
     draw_snake_head(&config->first_player, shift);
@@ -292,6 +308,8 @@ void draw_game(GameConfig *config, unsigned int *score_list, float shift) {
         draw_snake_body(&config->second_player, shift);
         draw_snake_head(&config->second_player, shift);
     }
+
+    draw_uppers_game_objects(config);
 
     /* draw_grid(); */
     MLV_draw_filled_rectangle(0, 0, SCREEN_WIDTH, SCREEN_Y_PADDING, MLV_COLOR_WHITE);

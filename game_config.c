@@ -17,10 +17,10 @@ void init_game(GameConfig *game_config, GAME_MODE game_mode) {
     game_config->objects[1].type = GAME_OBJECT_NONE;
     game_config->objects[2].type = GAME_OBJECT_PORTAL;
     game_config->objects[3].type = GAME_OBJECT_PORTAL;
+    game_config->objects[4].type = GAME_OBJECT_NONE;
     
     if (game_mode == GAME_TWO_PLAYER_MODE) {
         game_config->second_player = create_snake();
-        load_snake_sprite(&game_config->second_player, 8);
 
         get_snake_head_position(&game_config->second_player)->x = 7;
         move_and_expand_snake(&game_config->second_player);
@@ -29,6 +29,10 @@ void init_game(GameConfig *game_config, GAME_MODE game_mode) {
         
         game_config->objects[1].type = GAME_OBJECT_APPLE;
         place_game_object(game_config, &game_config->objects[1]);
+        game_config->objects[4].type = GAME_OBJECT_PORTAL;
+
+        place_game_object(game_config, &game_config->objects[1]);
+        place_game_object(game_config, &game_config->objects[4]);
     }
 
     
@@ -81,6 +85,25 @@ void place_game_object(GameConfig *game_config, GameObject *object) {
     } while (!is_good);
 
     object->pos = random_p;
+}
+
+void replace_portals(GameConfig *config) {
+    GameObject *object;
+    int i, is_first_player_in_portal, is_second_player_in_portal;
+
+    for (i = 0; i < GAME_OBJECTS_NUMBER; i++) {
+        object = config->objects + i;
+
+        is_first_player_in_portal = find_snake_part_by_position(&config->first_player, object->pos) != -1;
+        is_second_player_in_portal = config->game_mode == GAME_TWO_PLAYER_MODE && 
+                                     find_snake_part_by_position(&config->second_player, object->pos) != -1;
+    
+        if (object->type == GAME_OBJECT_PORTAL && 
+            !is_first_player_in_portal && 
+            !is_second_player_in_portal)
+            place_game_object(config, object);
+    }
+
 }
 
 MLV_Image* save_sprite_load(const char *file_name) {

@@ -11,7 +11,7 @@
 #define _GAME_CONFIG_H
 
 #define GAME_SCORE_LIST_SIZE 10
-#define GAME_OBJECTS_NUMBER 4
+#define GAME_OBJECTS_NUMBER 5
 
 #include"snake.h"
 #include"vector2i.h"
@@ -59,6 +59,8 @@ typedef struct {
 void init_game(GameConfig *game_config, GAME_MODE game_mode);
 
 void place_game_object(GameConfig *game_config, GameObject *object);
+
+void replace_portals(GameConfig *config);
     
 void load_objects_sprites(GameConfig *game_config);
 

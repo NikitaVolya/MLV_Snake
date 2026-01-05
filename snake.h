@@ -17,8 +17,7 @@
 #include"vector2i.h"
 
 #define MAX_SNAKE_SIZE 900
-#define MIN_SNAKE_SPRITE_INDEX 0
-#define MAX_SNAKE_SPRITE_INDEX 15
+#define MAX_SNAKE_SPRITE_INDEX 21
 #define SNAKE_SPRITE_BASE_PATH "ressources/snake/snake000.png"
 #define SNAKE_SPRITE_NUMBER_INDEX 24
 
@@ -162,6 +161,16 @@ SnakeDirection get_snake_next_rotation(Snake *snake);
  * @warning Exits the program if index is out of bounds.
  */
 vector2i* get_snake_part_position(Snake *snake, size_t index);
+
+/**
+ * @brief Founds a specific segment of the snake by position
+ *
+ * @param[in] snake Pointer.
+ * @param[in] pos Position of segment.
+ * @return index of a segment of the snake in this position
+ *         -1 otherwise.
+*/
+int find_snake_part_by_position(Snake *snake, vector2i pos);
 
 /**
  * @brief Returns the position of the snake's head.

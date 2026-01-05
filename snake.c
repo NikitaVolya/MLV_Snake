@@ -9,7 +9,7 @@ void load_snake_sprite(Snake *snake, int index) {
 
     sprite = &snake->sprite;
 
-    if (index < MIN_SNAKE_SPRITE_INDEX || index > MAX_SNAKE_SPRITE_INDEX) {
+    if (index < 0 || index > MAX_SNAKE_SPRITE_INDEX) {
         fprintf(stderr, "Warining : snake sprite index %d out of bounds\nset sprite index to 0\n", index);
         index = 0;
     }
@@ -112,6 +112,21 @@ vector2i* get_snake_part_position(Snake *snake, size_t index) {
     real_index = (index + snake->head_index + MAX_SNAKE_SIZE) % MAX_SNAKE_SIZE;
 
     return &snake->items[real_index];
+}
+
+int find_snake_part_by_position(Snake *snake, vector2i pos) {
+    size_t i;
+    int res;
+
+    res = -1;
+    for (i = 0; i < snake->count && res == -1; i++) {
+        if (get_snake_part_position(snake, i)->x == pos.x &&
+            get_snake_part_position(snake, i)->y == pos.y) {
+                res = (int) i;
+            }
+    }
+
+    return res;
 }
 
 vector2i* get_snake_head_position(Snake *snake) {
