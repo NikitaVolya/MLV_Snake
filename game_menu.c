@@ -55,6 +55,25 @@ void draw_background(unsigned long time) {
     }
 }
 
+void load_snake_skin_view(int index, MLV_Image **output) {
+    char path[35];
+
+    strcpy(path, SNAKE_SPRITE_BASE_PATH);
+    path[SNAKE_SPRITE_NUMBER_INDEX] = '0' + index % 10;
+    path[SNAKE_SPRITE_NUMBER_INDEX - 1] = '0' + index / 10 % 10;
+    path[SNAKE_SPRITE_NUMBER_INDEX - 2] = '0' + index / 100 % 10;
+
+    if (output != NULL)
+        MLV_free_image(*output);
+
+    *output = MLV_load_image(path);
+
+    if (*output != NULL)
+        MLV_resize_image_with_proportions(*output, 
+                                          MENU_SNAKE_SPRITE_PREVIEW_SIZE, 
+                                          MENU_SNAKE_SPRITE_PREVIEW_SIZE);
+}
+
 void select_solo_skin_dialog(GameConfig *config) {
     vector2i mouse_p;
     MLV_Button_state mouse_state, old_mouse_state;
@@ -62,7 +81,6 @@ void select_solo_skin_dialog(GameConfig *config) {
     MLV_Image *snake_sprite;
     int cancel_dialog, selected_skin;
     unsigned int time = 0;
-    char path[35];
 
     prev_btn = MLV_create_button("<=", 
         create_vector2i(SCREEN_WIDTH / 2 - SCREEN_WIDTH / 15, SCREEN_HEIGH / 2), 
@@ -83,8 +101,8 @@ void select_solo_skin_dialog(GameConfig *config) {
     cancel_dialog = 0;
     old_mouse_state = MLV_PRESSED;
 
-    strcpy(path, SNAKE_SPRITE_BASE_PATH);
-    snake_sprite = MLV_load_image(path);
+    snake_sprite = NULL;
+    load_snake_skin_view(0, &snake_sprite);
 
     while (!cancel_dialog) {
         
@@ -93,7 +111,10 @@ void select_solo_skin_dialog(GameConfig *config) {
         draw_background(time);
 
         if (snake_sprite != NULL)
-            MLV_draw_partial_image(snake_sprite, 32, 0, 64, 32, SCREEN_WIDTH / 2 - 32, SCREEN_HEIGH / 2 - 100);
+            MLV_draw_partial_image(snake_sprite, 
+                                   MENU_SNAKE_SPRITE_PREVIEW_SIZE / 4, 0, 
+                                   MENU_SNAKE_SPRITE_PREVIEW_SIZE / 2, MENU_SNAKE_SPRITE_PREVIEW_SIZE / 4, 
+                                   SCREEN_WIDTH / 2 - MENU_SNAKE_SPRITE_PREVIEW_SIZE / 4, SCREEN_HEIGH / 2 - 20 - MENU_SNAKE_SPRITE_PREVIEW_SIZE / 4);
 
         MLV_draw_button(&prev_btn, &mouse_p);
         MLV_draw_button(&next_btn, &mouse_p);
@@ -101,9 +122,7 @@ void select_solo_skin_dialog(GameConfig *config) {
 
         MLV_actualise_window();
 
-        
         mouse_state = MLV_get_mouse_button_state(MLV_BUTTON_LEFT);
-
         if (mouse_state == MLV_PRESSED && old_mouse_state == MLV_RELEASED) {
             if (MLV_mouse_is_on_button(&close_btn, &mouse_p)) {
                 cancel_dialog = 1;
@@ -113,28 +132,16 @@ void select_solo_skin_dialog(GameConfig *config) {
                 if (selected_skin < 0)
                     selected_skin = MAX_SNAKE_SPRITE_INDEX;
 
-                path[SNAKE_SPRITE_NUMBER_INDEX] = '0' + selected_skin % 10;
-                path[SNAKE_SPRITE_NUMBER_INDEX - 1] = '0' + selected_skin / 10 % 10;
-                path[SNAKE_SPRITE_NUMBER_INDEX - 2] = '0' + selected_skin / 100 % 10;
-
-                MLV_free_image(snake_sprite);
-                snake_sprite = MLV_load_image(path);
+                load_snake_skin_view(selected_skin, &snake_sprite);
             }
             else if (MLV_mouse_is_on_button(&next_btn, &mouse_p)) {
                 selected_skin++;
                 if (selected_skin > MAX_SNAKE_SPRITE_INDEX)
                     selected_skin = 0;
 
-                path[SNAKE_SPRITE_NUMBER_INDEX] = '0' + selected_skin % 10;
-                path[SNAKE_SPRITE_NUMBER_INDEX - 1] = '0' + selected_skin / 10 % 10;
-                path[SNAKE_SPRITE_NUMBER_INDEX - 2] = '0' + selected_skin / 100 % 10;
-
-                MLV_free_image(snake_sprite);
-                snake_sprite = MLV_load_image(path);
+                load_snake_skin_view(selected_skin, &snake_sprite);
             }
         }
-
-        printf("%s\n", path);
 
         MLV_wait_milliseconds(100);
         time += 100;
@@ -142,10 +149,129 @@ void select_solo_skin_dialog(GameConfig *config) {
         old_mouse_state = mouse_state;
     }
 
-    MLV_free_image(snake_sprite);
+    if (snake_sprite != NULL)
+        MLV_free_image(snake_sprite);
+
     load_snake_sprite(&config->first_player, selected_skin);
+
+    MLV_free_button(&close_btn);
+    MLV_free_button(&prev_btn);
+    MLV_free_button(&next_btn);
 }
 
+void select_duo_skin_dialog(GameConfig *config) {
+    vector2i mouse_p;
+
+    MLV_Event event;
+    MLV_Keyboard_button key;
+    MLV_Button_state btn_state;
+
+    MLV_Button close_btn;
+    MLV_Image *first_snake_sprite, *second_snake_sprite;
+
+    int cancel_dialog, first_selected_skin, second_selected_skin;
+    unsigned int time = 0;
+
+    close_btn = MLV_create_button("Start game", 
+        create_vector2i(SCREEN_WIDTH / 2 - SCREEN_WIDTH / 6, SCREEN_HEIGH * 3 / 4), 
+        create_vector2i(SCREEN_WIDTH / 3, MENU_BUTTON_HEIGHT * 1.5), 
+        MLV_COLOR_WHITE, MLV_COLOR_BLUE, MLV_COLOR_GREEN);
+    
+    first_selected_skin = 0;
+    second_selected_skin = 0;
+
+    cancel_dialog = 0;
+
+    first_snake_sprite = NULL;
+    second_snake_sprite = NULL;
+    load_snake_skin_view(0, &first_snake_sprite);
+    load_snake_skin_view(0, &second_snake_sprite);
+
+    while (!cancel_dialog) {
+
+        MLV_get_mouse_position(&mouse_p.x, &mouse_p.y);
+        event = MLV_get_event(&key, NULL, NULL, NULL, NULL,
+                              NULL, NULL, NULL, &btn_state);
+
+        draw_background(time);
+
+        if (first_snake_sprite != NULL)
+            MLV_draw_partial_image(first_snake_sprite, 
+                                   MENU_SNAKE_SPRITE_PREVIEW_SIZE / 4, 0, 
+                                   MENU_SNAKE_SPRITE_PREVIEW_SIZE / 2, MENU_SNAKE_SPRITE_PREVIEW_SIZE / 4, 
+                                   SCREEN_WIDTH / 2 - MENU_SNAKE_SPRITE_PREVIEW_SIZE * 2 / 3, SCREEN_HEIGH / 2 - 20 - MENU_SNAKE_SPRITE_PREVIEW_SIZE / 4);
+        
+        if (second_snake_sprite != NULL)
+            MLV_draw_partial_image(second_snake_sprite, 
+                                   MENU_SNAKE_SPRITE_PREVIEW_SIZE / 4, 0, 
+                                   MENU_SNAKE_SPRITE_PREVIEW_SIZE / 2, MENU_SNAKE_SPRITE_PREVIEW_SIZE / 4, 
+                                   SCREEN_WIDTH / 2 + MENU_SNAKE_SPRITE_PREVIEW_SIZE / 5, SCREEN_HEIGH / 2 - 20 - MENU_SNAKE_SPRITE_PREVIEW_SIZE / 4);
+        
+        MLV_draw_button(&close_btn, &mouse_p);
+
+        MLV_actualise_window();
+
+        switch (event) {
+            case MLV_MOUSE_BUTTON:
+                if (btn_state == MLV_PRESSED && 
+                    MLV_mouse_is_on_button(&close_btn, &mouse_p)) {
+                        cancel_dialog = 1;
+                }
+                break;
+            case MLV_KEY:
+                if (btn_state == MLV_PRESSED)
+                    switch (key) {
+                        case MLV_KEYBOARD_q:
+                            first_selected_skin--;
+                            if (first_selected_skin < 0)
+                                first_selected_skin = MAX_SNAKE_SPRITE_INDEX;
+
+                            load_snake_skin_view(first_selected_skin, &first_snake_sprite);
+                            break;
+                        case MLV_KEYBOARD_d:
+                            first_selected_skin++;
+                            if (first_selected_skin > MAX_SNAKE_SPRITE_INDEX)
+                                first_selected_skin = 0;
+
+                            load_snake_skin_view(first_selected_skin, &first_snake_sprite);
+                            break; 
+                        case MLV_KEYBOARD_LEFT:
+                            second_selected_skin--;
+                            if (second_selected_skin < 0)
+                                second_selected_skin = MAX_SNAKE_SPRITE_INDEX;
+
+                            load_snake_skin_view(second_selected_skin, &second_snake_sprite);
+                            break;
+                        case MLV_KEYBOARD_RIGHT:
+                            second_selected_skin++;
+                            if (second_selected_skin > MAX_SNAKE_SPRITE_INDEX)
+                                second_selected_skin = 0;
+
+                            load_snake_skin_view(second_selected_skin, &second_snake_sprite);
+                            break; 
+                        default:
+                            break;
+                    }
+                break;
+            default:
+                break;
+        }
+        
+
+        MLV_wait_milliseconds(100);
+        time += 100;
+    }
+
+    if (first_snake_sprite != NULL)
+        MLV_free_image(first_snake_sprite);
+    if (second_snake_sprite != NULL)
+        MLV_free_image(second_snake_sprite);
+
+    load_snake_sprite(&config->first_player, first_selected_skin);
+    load_snake_sprite(&config->second_player, second_selected_skin);
+
+    MLV_free_button(&close_btn);
+}
 
 void show_menu_screen() {
     vector2i mouse_p, tmp_p, btn_size;
@@ -208,17 +334,16 @@ void show_menu_screen() {
                 config.move_timer = MOVE_TIME;
 
                 select_solo_skin_dialog(&config);
-
                 game_cycle(&config);
-
                 free_game_config(&config);
             }
 
             if (MLV_mouse_is_on_button(&start_two_player_btn, &mouse_p)) {
                 init_game(&config, GAME_TWO_PLAYER_MODE);
                 config.move_timer = MOVE_TIME;
-                game_cycle(&config);
 
+                select_duo_skin_dialog(&config);
+                game_cycle(&config);
                 free_game_config(&config);
             }
 

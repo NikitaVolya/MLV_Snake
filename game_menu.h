@@ -28,6 +28,8 @@
 #define MENU_PADDDING ( MENU_HEIGHT / 10 )     /**< Padding between buttons */
 #define MENU_BUTTON_HEIGHT 40                  /**< Height of menu buttons */
 
+#define MENU_SNAKE_SPRITE_PREVIEW_SIZE 512
+
 /**
  * @brief Displays the main menu screen before starting the game.
  *
