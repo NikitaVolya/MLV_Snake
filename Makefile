@@ -34,6 +34,6 @@ $(TARGET): $(OBJ)
 
 # Cleaning
 clean:
-	rm -f $(OBJ) $(DEP) $(TARGET)
+	rm -rf $(OBJ) $(DEP) $(TARGET) doc/ 
 
 .PHONY: all clean
