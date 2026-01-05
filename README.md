@@ -25,7 +25,3 @@ La compilation génère un exécutable nommé **snake_game**.
 ## Équipe du projet
 - **VOLIANSKYI Nikita**
 - **MELKONIAN Mark**
-
-## Liens utiles
-- [Documentation Doxygen](https://www.doxygen.nl/manual/index.html)
-- [MLV Library](https://mlv-library.github.io/)
