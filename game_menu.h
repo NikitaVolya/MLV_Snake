@@ -1,20 +1,19 @@
 /**
  * @file game_menu.h
- * @brief Functions to display and handle the game menu for the Snake game.
+ * @brief Functions to display and handle the game menus for the Snake game.
  *
- * This file provides functions for showing the main menu and in-game menu,
- * handling mouse input, and creating interactive buttons to control the game,
- * such as starting, saving, loading, or exiting.
+ * This header declares:
+ * - The main menu screen (before gameplay)
  */
 
 #ifndef _GAME_MENU_H
-#define _GEME_MENU_H
+#define _GAME_MENU_H
 
 #include<stdlib.h>
 #include<stdio.h>
 #include<MLV/MLV_all.h>
-#include <math.h>
-#include <stdint.h>
+#include<math.h>
+#include<stdint.h>
 
 #include"game_config.h"
 #include"game_logic.h"
@@ -33,8 +32,8 @@
  *
  * @details
  * Provides buttons to start a single-player or two-player game,
- * load a saved game, or exit the application. Handles mouse input
- * to detect button clicks and performs the corresponding action.
+ * load a saved game, or exit the application. Also renders an animated
+ * background and decorative animated snakes.
  */
 void show_menu_screen();
 
@@ -48,6 +47,5 @@ void show_menu_screen();
  * Updates the game state according to the player's choice.
  */
 void show_menu(GameConfig *config);
-
 
 #endif /* _GAME_MENU_H */
