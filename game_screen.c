@@ -5,24 +5,6 @@ void init_game_screen() {
     MLV_create_window("snake", "Snake game", SCREEN_WIDTH, SCREEN_HEIGH);
 }
 
-void draw_grid() {
-    int i, j;
-
-    for (i = 0; i < GRID_SIZE; i++) {
-        for (j = 0; j < GRID_SIZE; j++) {
-
-            MLV_draw_rectangle(
-                SCREEN_X_PADDING + GRID_CELL_DRAW_SIZE * i,
-                SCREEN_Y_PADDING + GRID_CELL_DRAW_SIZE * j,
-                GRID_CELL_DRAW_SIZE,
-                GRID_CELL_DRAW_SIZE,
-                MLV_COLOR_BLACK
-                );
-
-        }
-    }
-}
-
 void delete_image_part(MLV_Image *image, int x, int y, int width, int height) {
     int i, j;
 
@@ -311,7 +293,6 @@ void draw_game(GameConfig *config, unsigned int *score_list, float shift) {
 
     draw_uppers_game_objects(config);
 
-    /* draw_grid(); */
     MLV_draw_filled_rectangle(0, 0, SCREEN_WIDTH, SCREEN_Y_PADDING, MLV_COLOR_WHITE);
     MLV_draw_filled_rectangle(0, SCREEN_Y_PADDING + GRID_SIZE * GRID_CELL_DRAW_SIZE, 
                               SCREEN_WIDTH, SCREEN_Y_PADDING, 
@@ -326,8 +307,10 @@ void draw_game(GameConfig *config, unsigned int *score_list, float shift) {
                        GRID_SIZE * GRID_CELL_DRAW_SIZE,
                        MLV_COLOR_BLACK);
 
-    draw_score(config->score);
-    draw_score_list(score_list);
+    if (config->game_mode != GAME_TWO_PLAYER_MODE) {
+        draw_score(config->score);
+        draw_score_list(score_list);
+    }
 
     MLV_actualise_window();
 }

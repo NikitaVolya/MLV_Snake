@@ -224,6 +224,8 @@ void select_solo_skin_dialog(GameConfig *config) {
     MLV_Button_state mouse_state, old_mouse_state;
     MLV_Button prev_btn, next_btn, close_btn;
 
+    MLV_Font *title_font;
+
     MLV_Image *snake_sprite;
     int cancel_dialog, selected_skin;
     
@@ -246,6 +248,8 @@ void select_solo_skin_dialog(GameConfig *config) {
         create_vector2i(SCREEN_WIDTH / 2 - SCREEN_WIDTH / 6, SCREEN_HEIGH * 3 / 4), 
         create_vector2i(SCREEN_WIDTH / 3, MENU_BUTTON_HEIGHT * 1.5), 
         MLV_COLOR_WHITE, MLV_COLOR_BLUE, MLV_COLOR_GREEN);
+
+    title_font = MLV_load_font("ressources/fonts/PixelifySans-VariableFont_wght.ttf", 64);
     
     time_s = 0.f;
     selected_skin = 0;
@@ -262,6 +266,27 @@ void select_solo_skin_dialog(GameConfig *config) {
         MLV_get_mouse_position(&mouse_p.x, &mouse_p.y);
 
         draw_background(time_s, 0);
+
+        /* Title */
+        {
+            const char *title;
+            int tw;
+            int th;
+            int tx;
+            int ty;
+
+            title = "SKIN SELECTION";
+
+            MLV_get_size_of_text_with_font(title, &tw, &th, title_font);
+            tx = (SCREEN_WIDTH - tw) / 2;
+            ty = (SCREEN_HEIGH / 6 - th) / 2;
+
+            MLV_draw_text_with_font(tx - 2, ty, title, title_font, MLV_COLOR_BLACK);
+            MLV_draw_text_with_font(tx + 2, ty, title, title_font, MLV_COLOR_BLACK);
+            MLV_draw_text_with_font(tx, ty - 2, title, title_font, MLV_COLOR_BLACK);
+            MLV_draw_text_with_font(tx, ty + 2, title, title_font, MLV_COLOR_BLACK);
+            MLV_draw_text_with_font(tx, ty, title, title_font, MLV_COLOR_WHITE);
+        }
 
         if (snake_sprite != NULL)
             MLV_draw_partial_image(snake_sprite, 
@@ -317,6 +342,8 @@ void select_solo_skin_dialog(GameConfig *config) {
     MLV_free_button(&close_btn);
     MLV_free_button(&prev_btn);
     MLV_free_button(&next_btn);
+
+    MLV_free_font(title_font);
 }
 
 void select_duo_skin_dialog(GameConfig *config) {
@@ -329,6 +356,8 @@ void select_duo_skin_dialog(GameConfig *config) {
     MLV_Button close_btn;
     MLV_Image *first_snake_sprite, *second_snake_sprite;
 
+    MLV_Font *title_font, *text_font;
+
     int cancel_dialog, first_selected_skin, second_selected_skin;
     
     struct timespec start_time;
@@ -340,6 +369,9 @@ void select_duo_skin_dialog(GameConfig *config) {
         create_vector2i(SCREEN_WIDTH / 2 - SCREEN_WIDTH / 6, SCREEN_HEIGH * 3 / 4), 
         create_vector2i(SCREEN_WIDTH / 3, MENU_BUTTON_HEIGHT * 1.5), 
         MLV_COLOR_WHITE, MLV_COLOR_BLUE, MLV_COLOR_GREEN);
+    
+    title_font = MLV_load_font("ressources/fonts/PixelifySans-VariableFont_wght.ttf", 64);
+    text_font = MLV_load_font("ressources/fonts/PixelifySans-VariableFont_wght.ttf", 21);
     
     time_s = 0;
     first_selected_skin = 0;
@@ -362,17 +394,52 @@ void select_duo_skin_dialog(GameConfig *config) {
 
         draw_background(time_s, 0);
 
+        /* Title */
+        {
+            const char *title;
+            int tw;
+            int th;
+            int tx;
+            int ty;
+
+            title = "SKIN SELECTION";
+
+            MLV_get_size_of_text_with_font(title, &tw, &th, title_font);
+            tx = (SCREEN_WIDTH - tw) / 2;
+            ty = (SCREEN_HEIGH / 6 - th) / 2;
+
+            MLV_draw_text_with_font(tx - 2, ty, title, title_font, MLV_COLOR_BLACK);
+            MLV_draw_text_with_font(tx + 2, ty, title, title_font, MLV_COLOR_BLACK);
+            MLV_draw_text_with_font(tx, ty - 2, title, title_font, MLV_COLOR_BLACK);
+            MLV_draw_text_with_font(tx, ty + 2, title, title_font, MLV_COLOR_BLACK);
+            MLV_draw_text_with_font(tx, ty, title, title_font, MLV_COLOR_WHITE);
+        }
+
         if (first_snake_sprite != NULL)
             MLV_draw_partial_image(first_snake_sprite, 
                                    MENU_SNAKE_SPRITE_PREVIEW_SIZE / 4, 0, 
                                    MENU_SNAKE_SPRITE_PREVIEW_SIZE / 2, MENU_SNAKE_SPRITE_PREVIEW_SIZE / 4, 
                                    SCREEN_WIDTH / 2 - MENU_SNAKE_SPRITE_PREVIEW_SIZE * 2 / 3, SCREEN_HEIGH / 2 - 20 - MENU_SNAKE_SPRITE_PREVIEW_SIZE / 4);
+
+        MLV_draw_text_box_with_font(
+                                SCREEN_WIDTH / 2 - MENU_SNAKE_SPRITE_PREVIEW_SIZE * 2 / 3, SCREEN_HEIGH / 2 - 20,
+                                MENU_SNAKE_SPRITE_PREVIEW_SIZE / 2, MENU_SNAKE_SPRITE_PREVIEW_SIZE / 4,
+                                "Select skin with Q and D", text_font, 0,
+                                MLV_rgba(0, 0, 0, 0), MLV_COLOR_WHITE, MLV_rgba(0, 0, 0, 0),
+                                MLV_TEXT_CENTER, MLV_HORIZONTAL_CENTER, MLV_VERTICAL_CENTER );
         
         if (second_snake_sprite != NULL)
             MLV_draw_partial_image(second_snake_sprite, 
                                    MENU_SNAKE_SPRITE_PREVIEW_SIZE / 4, 0, 
                                    MENU_SNAKE_SPRITE_PREVIEW_SIZE / 2, MENU_SNAKE_SPRITE_PREVIEW_SIZE / 4, 
                                    SCREEN_WIDTH / 2 + MENU_SNAKE_SPRITE_PREVIEW_SIZE / 5, SCREEN_HEIGH / 2 - 20 - MENU_SNAKE_SPRITE_PREVIEW_SIZE / 4);
+
+        MLV_draw_text_box_with_font(
+                                SCREEN_WIDTH / 2 + MENU_SNAKE_SPRITE_PREVIEW_SIZE / 5, SCREEN_HEIGH / 2 - 20,
+                                MENU_SNAKE_SPRITE_PREVIEW_SIZE / 2, MENU_SNAKE_SPRITE_PREVIEW_SIZE / 4,
+                                "Select skin with \nARROWS LEFT and RIGTH", text_font, 0,
+                                MLV_rgba(0, 0, 0, 0), MLV_COLOR_WHITE, MLV_rgba(0, 0, 0, 0),
+                                MLV_TEXT_CENTER, MLV_HORIZONTAL_CENTER, MLV_VERTICAL_CENTER );
         
         MLV_draw_button(&close_btn, &mouse_p);
 
@@ -444,6 +511,9 @@ void select_duo_skin_dialog(GameConfig *config) {
     load_snake_sprite(&config->second_player, second_selected_skin);
 
     MLV_free_button(&close_btn);
+
+    MLV_free_font(title_font);
+    MLV_free_font(text_font);
 }
 
 void show_menu_screen() {
@@ -483,6 +553,9 @@ void show_menu_screen() {
     MLV_Color menu_highlight_color;
 
     int left_margin;
+
+    /* ---- fonts ---- */
+    MLV_Font* title_font;
 
     /* ---- snakes ---- */
     const int preset_right[5] = { 15, 14, 13, 12, 11 };
@@ -527,6 +600,8 @@ void show_menu_screen() {
     int palette_i;
 
     init_game_screen();
+
+    title_font = MLV_load_font("ressources/fonts/PixelifySans-VariableFont_wght.ttf", 64);
 
     srand((unsigned int)time(NULL));
     palette_i = 0;
@@ -666,15 +741,15 @@ void show_menu_screen() {
 
             title = "SNAKE GAME";
 
-            MLV_get_size_of_text(title, &tw, &th);
+            MLV_get_size_of_text_with_font(title, &tw, &th, title_font);
             tx = (SCREEN_WIDTH - tw) / 2;
             ty = (title_height - th) / 2;
 
-            MLV_draw_text(tx - 2, ty, title, MLV_COLOR_BLACK);
-            MLV_draw_text(tx + 2, ty, title, MLV_COLOR_BLACK);
-            MLV_draw_text(tx, ty - 2, title, MLV_COLOR_BLACK);
-            MLV_draw_text(tx, ty + 2, title, MLV_COLOR_BLACK);
-            MLV_draw_text(tx, ty, title, MLV_COLOR_WHITE);
+            MLV_draw_text_with_font(tx - 2, ty, title, title_font, MLV_COLOR_BLACK);
+            MLV_draw_text_with_font(tx + 2, ty, title, title_font, MLV_COLOR_BLACK);
+            MLV_draw_text_with_font(tx, ty - 2, title, title_font, MLV_COLOR_BLACK);
+            MLV_draw_text_with_font(tx, ty + 2, title, title_font, MLV_COLOR_BLACK);
+            MLV_draw_text_with_font(tx, ty, title, title_font, MLV_COLOR_WHITE);
         }
 
         /* Draw snakes first so they appear under the buttons */
@@ -782,6 +857,9 @@ void show_menu_screen() {
     MLV_free_button(&start_signle_btn);
     MLV_free_button(&start_two_player_btn);
     MLV_free_button(&exit_btn);
+
+    /* Clean fonts */
+    MLV_free_font(title_font);
 
     free_game_screen();
 }
